@@ -1,0 +1,7 @@
+---
+# satellite-auth handlers
+
+# Add copied certificates to server CA trust
+- name: Update CA trusts
+  command: >
+    /bin/update-ca-trust extract

@@ -1,0 +1,18 @@
+---
+galaxy_info:
+  author: Stephen Clayton
+  description: Content role for Red Hat Satellite 6
+  # company: your company (optional)
+  license: GPLv3
+  min_ansible_version: 1.9.4
+  platforms:
+    - name: EL
+      versions:
+        - 6
+        - 7
+  categories:
+    - cloud
+    - cloud:ec2
+    - packaging
+    - system
+dependencies: []

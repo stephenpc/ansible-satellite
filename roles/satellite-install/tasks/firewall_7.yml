@@ -1,0 +1,22 @@
+---
+# Firewall setup in RHEL7
+
+- name: Install FirewallD
+  yum:
+    name: firewalld
+    state: present
+
+- name: Run FirewallD now and at boot
+  service:
+    name: firewalld
+    state: started
+    enabled: yes
+
+- name: Enable HTTPS, HTTPD, SSL, Tomcat, Puppet, Foreman via firewalld
+  firewalld:
+    service: "{{ item.service | default(omit) }}"
+    port: "{{ item.port | default(omit) }}"
+    permanent: yes
+    state: enabled
+  notify: Restart FirewallD
+  with_items: sat_firewalld_rules

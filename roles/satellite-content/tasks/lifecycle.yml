@@ -1,0 +1,18 @@
+---
+# Create lifecycle environments
+
+  # Build out each lifecycle environment
+  - name: Creating lifecycle environments
+    command: >
+      /bin/hammer lifecycle-environment create
+      --organization "{{ initial_org }}"
+      --name "{{ item.env }}"
+      --description "{{ item.env }} Environment"
+      --prior "{{ item.prior }}"
+    register: create_lifecycle_env
+    with_items: sat_lifecycle
+    failed_when: >
+      create_lifecycle_env.rc != 0
+      and create_lifecycle_env.rc != 65
+    changed_when: >
+      create_lifecycle_env.rc == 0

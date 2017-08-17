@@ -1,0 +1,18 @@
+---
+galaxy_info:
+  author: Stephen Clayton
+  description: Maintenance role for Satellite 6, which includes plays for updating content and adjusting security settings
+  # company: your company (optional)
+  license: GPLv3
+  min_ansible_version: 1.9.4
+  platforms:
+    - name: EL
+      versions:
+        - 6
+        - 7
+  categories:
+    - cloud
+    - cloud:ec2
+    - packaging
+    - system
+dependencies: []

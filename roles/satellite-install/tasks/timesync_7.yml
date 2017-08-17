@@ -1,0 +1,13 @@
+---
+# NTP setup for RHEL7
+
+  - name: Install chrony
+    yum:
+      name: chrony
+      state: latest
+
+  - name: Enable chrony service
+    service:
+      name: chronyd
+      state: started
+      enabled: yes

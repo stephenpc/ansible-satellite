@@ -1,0 +1,15 @@
+---
+# ansible-satellite | Upgrade
+
+- hosts: satellite6-server-prod
+  become: yes
+  vars_files:
+    - group_vars/all.yml
+  gather_facts: yes
+  roles:
+    # satellite-upgrade | Perform Satellite Upgrade
+    - role: satellite-upgrade
+      slack_upgrade_notify: yes
+    # satellite-maintenance | Maintenance tasks
+    - role: satellite-maintenance
+      security_tweaks: yes

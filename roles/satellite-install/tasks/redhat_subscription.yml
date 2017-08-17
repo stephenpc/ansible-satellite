@@ -1,0 +1,102 @@
+---
+# Red Hat subscription
+
+  # Prep for install on EC2 if needed
+  - include: on_aws_ec2.yml
+    when: >
+      ansible_bios_version.find("amazon") or
+      ansible_product_version.find("amazon")
+
+  # Check registration status of the system
+  - name: Check subscription-manager status
+    command: >
+      /sbin/subscription-manager status
+    register: subscription_state
+    changed_when: no
+    failed_when: >
+      subscription_state.stdout.find("System Status Details") == -1
+    ignore_errors: yes
+
+  # Unregister the current system subscription if it is already subscription_state
+  - name: Deregister the system and purge subscription data if it was already subscribed
+    shell: >
+      /sbin/subscription-manager unregister && /sbin/subscription-manager clean
+    register: subscription_deregister
+    failed_when: >
+      subscription_state.rc == 0
+      and subscription_deregister.rc == 1
+    when: >
+      subscription_state.stdout.find("Current")
+    ignore_errors: yes
+
+  # Register the system with subscription-manager
+  - name: Enable RHEL subscription via username/password
+    redhat_subscription:
+      state: present
+      username: "{{ rhn_user }}"
+      password: "{{ rhn_pass }}"
+      server_insecure: no
+    when: >
+      rhn_user is defined
+      and rhn_pass is defined
+    no_log: yes
+
+  # Use an activation key to register and attach a subscription for Satellite
+  - name: Enable RHEL subscription via activation key
+    redhat_subscription:
+      state: present
+      activationkey: "{{ rhn_activationkey }}"
+      pool: ".*Red Hat (Enterprise Linux|Satellite).*"
+    when: >
+      rhn_activation_key is defined
+      and rhn_pool_id is not defined
+
+  # Attach the pool that contains a subscription for Satellite
+  - name: Attach Satellite subscription to this system
+    command: >
+      /sbin/subscription-manager subscribe --pool {{ rhn_pool_id }}
+    when: >
+      rhn_pool_id is defined
+
+  # Disable all repos on the system that are managed by subscription-manager
+  - name: Disable all repositories
+    command: >
+      /sbin/subscription-manager repos --disable "*"
+
+  # Note: Satellite channel is rhel-<rhel version>-server-satellite-<satellite version>-rpms
+  - name: Enable repositories required for Satellite installation
+    command: >
+      /sbin/subscription-manager repos --enable "{{ item }}"
+    with_items:
+      - "rhel-{{ ansible_distribution_major_version }}-server-rpms"
+      - "rhel-server-rhscl-{{ ansible_distribution_major_version }}-rpms"
+      - "rhel-{{ ansible_distribution_major_version }}-server-satellite-6.1-rpms"
+
+  # Get the RHEL server release versions
+  - name: Check RHEL server release versions
+    command: >
+      /sbin/subscription-manager release --list
+    changed_when: no
+    register: rhel_server_releases
+
+  # Print RHEL server release versions to console
+  - name: Available RHEL server release versions
+    debug:
+      msg: "{{ rhel_server_releases.stdout_lines }}"
+
+  # Set the Red Hat releae version so that the system can receive the most up to date packages
+  - name: Set RHEL server release version
+    command: >
+      /sbin/subscription-manager release --set {{ ansible_distribution_major_version }}Server
+
+  # Refresh yum data
+  - name: Clearing yum cache data
+    shell: >
+      /bin/yum clean all && /bin/yum makecache
+    ignore_errors: yes
+
+  # Grab the most current packages for the system before the installation
+  - name: Running yum for the most current updates
+    yum:
+      name: "*"
+      state: latest

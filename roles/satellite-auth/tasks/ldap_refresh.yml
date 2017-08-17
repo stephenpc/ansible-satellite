@@ -1,0 +1,81 @@
+---
+# Refresh user and group information for auth-source
+
+# Grab users from Satellite
+- name: Discover user information
+  become: no
+  local_action:
+    module: uri
+    body_format: json
+    method: GET
+    user: admin
+    password: "{{ sat_admin_password }}"
+    status_code: [ 200, 201 ]
+    url: "https://{{ satellite_server }}/api/v2/users"
+    validate_certs: no
+    force_basic_auth: yes
+  register: sat_users_get
+
+# Grab user group information
+- name: Discover user group information
+  become: no
+  local_action:
+    module: uri
+    body_format: json
+    method: GET
+    user: admin
+    password: "{{ sat_admin_password }}"
+    status_code: [ 200, 201 ]
+    url: "https://{{ satellite_server }}/api/v2/usergroups"
+    validate_certs: no
+    force_basic_auth: yes
+  register: sat_usergroups_get
+
+# Figure out what AD groups are a part of user groups
+- name: Discover external usergroups
+  become: no
+  local_action:
+    module: uri
+    body_format: json
+    method: GET
+    user: admin
+    password: "{{ sat_admin_password }}"
+    status_code: [ 200, 201 ]
+    url: "https://{{ satellite_server }}/api/v2/usergroups/{{ item.name }}"
+    validate_certs: no
+    force_basic_auth: yes
+  register: sat_externalusergroups_get
+  with_items: sat_usergroups_get.json.results
+
+# Refresh AD groups
+- name: Refresh external mappings to user group
+  command: >
+    /bin/hammer user-group external refresh
+    --id "{{ item.json.external_usergroups[0].id }}"
+    --user-group "{{ item.item.name }}"
+  register: sat_refreshexternalgroups
+  with_items: sat_externalusergroups_get.results
+
+# Set an organization and location for users
+- name: Set organization and location for users if not set
+  command: >
+    /bin/hammer user update
+    --login "{{ item.login }}"
+    --location-ids "{{ sat_auth_global.default_loc_id }}"
+    --organization-ids "{{ sat_auth_global.default_org_id }}"
+  register: sat_userupdate_orgloc
+  with_items: sat_users_get.json.results
+  when: >
+    {{ item.locations | length }} == 0
+    or {{ item.organizations | length }} == 0
+
+# Set the default organization
+- name: Set default organization from organization if not set
+  command: >
+    /bin/hammer user update
+    --login "{{ item.login }}"
+    --default-organization-id "{{ sat_auth_global.default_org_id }}"
+  register: sat_userupdate_orgloc_default
+  with_items: sat_users_get.json.results
+  when: >
+    item.default_organization is none

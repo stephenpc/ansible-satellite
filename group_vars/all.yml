@@ -1,0 +1,38 @@
+---
+# ansible-satellite group vars
+
+initial_org: "Your Organization"
+initial_loc: "Your Location"
+initial_user: "admin"
+sat_admin_email: "some-admin-user@yourdomain.com"
+sat_admin_firstname: "Admin"
+sat_admin_lastname: "User"
+
+# Place the file with this name in the roles/satellite-setup/files folder
+sat_manifest: "manifest.zip"
+
+sat_domain: "yourdomain.com"
+sat_hostname: "satellite"
+satellite_server: "satellite.yourdomain.com"
+
+#slack_token: "SOME-SUPER-LONG-SLACK-TOKEN-HERE"
+#slack_user: "SLACK-USERNAME"
+
+# Third-party SSL choices
+# custom_ssl:
+#   # Whether or not to use third party pki
+#   use: yes
+#   # Whether or not to attempt decryption of the private key
+#   encrypted_key: yes
+#   # File system location of certs/keys
+#   file_loc: "{{ ansible_user_dir }}"
+#   # Specify filenames for pki (retrieved from the files folder)
+#   pki:
+#     root: chain.crt
+#     key: satellite.key
+#     csr: satellite.csr
+#     cert: satellite.crt
+
+# Go through self-subscription process
+# self_subscribe_key: "satellite_key-ak"
+# satellite_product_sku: "SOME-RH-SKU"

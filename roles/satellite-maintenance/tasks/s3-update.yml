@@ -1,0 +1,27 @@
+---
+# Get content from an Amazon S3 bucket
+
+# Download packages from S3
+- name: Download packages from the S3 bucket
+  get_url:
+    dest: "{{ ansible_user_dir }}"
+    url: "https://s3.amazonaws.com/{{ sat_s3bucket }}/{{ item.1 }}"
+    validate_certs: no
+  register: sat_pkgs_from_s3
+  with_subelements:
+    - sat_custom_content
+    - rpms
+  ignore_errors: yes
+
+# Upload the packages if they have changed on the filesystem (compared to what was already there)
+- name: Upload changed packages to their respective repositories in the custom product
+  command: >
+    /bin/hammer repository upload-content
+    --organization "{{ initial_org }}"
+    --product "{{ sat_custom_product }}"
+    --name "{{ item.item[0].name }}"
+    --path "{{ item.dest }}"
+  register: sat_pkg_imports
+  with_items: sat_pkgs_from_s3.results
+  when: >
+    item.changed

@@ -1,0 +1,79 @@
+---
+# Remove content hosts from Satellite that are not found in the EC2 inventory
+
+- hosts: localhost
+  connection: local
+  become: no
+  gather_facts: yes
+
+  vars_prompt:
+    - name: "satellite_server"
+      prompt: "Enter the fully-qualified hostname of the Satellite server. (Required)"
+      private: no
+    - name: "sat_admin_user"
+      prompt: "Enter your username. (Required, defaults to admin)"
+      default: "admin"
+      private: no
+    - name: "sat_admin_password"
+      prompt: "Enter your password. (Required)"
+      private: yes
+    - name: "satellite_organization_id"
+      prompt: "Enter the organization ID for your Satellite. (Optional, defaults to 1)"
+      default: "1"
+      private: no
+    - name: "aws_region"
+      prompt: "Enter the AWS region. (Optional, defaults to us-east-1)"
+      default: "us-east-1"
+      private: no
+
+  tasks:
+    # Get list of content hosts from the Satellite API
+    - name: Grab current content hosts from Satellite
+      uri:
+        body_format: json
+        method: GET
+        user: "{{ sat_admin_user }}"
+        password: "{{ sat_admin_password }}"
+        status_code: [ 200, 201 ]
+        url: "https://{{ satellite_server }}/katello/api/systems?organization_id={{ satellite_organization_id | default(1) }}&per_page=5000"
+        validate_certs: no
+        force_basic_auth: yes
+      register: sat_contenthosts_get
+
+    - name: Get EC2 instances
+      command: >
+        aws ec2 describe-instances --region "{{ aws_region }}"
+      register: sat_aws_instances
+      changed_when: no
+
+    # Remove hosts from Satellite that are no longer present in EC2
+    - name: Remove content hosts from Satellite that are not present in AWS EC2
+      uri:
+        body_format: json
+        method: DELETE
+        user: "{{ sat_admin_user }}"
+        password: "{{ sat_admin_password }}"
+        status_code: [ 200, 201, 204 ]
+        url: "https://{{ satellite_server }}/katello/api/systems/{{ item.uuid }}"
+        validate_certs: no
+        force_basic_auth: yes
+      register: sat_contenthosts_remove
+      with_items: sat_contenthosts_get.json.results
+      ignore_errors: yes
+      when: >
+        sat_aws_instances.stdout.find("{{ item.name | replace('ec2.internal','') }}") == -1
+
+    # Alert Slack channel if needed variables are defined
+    - name: Alert Satellite channel in Slack
+      slack:
+        token: "{{ slack_token }}"
+        msg: "Removed {{ item.item.name }} with ID {{ item.item.uuid }} from Satellite. It was previously registered with the {{ item.item.activation_keys[0].name }} key."
+        username: "{{ slack_user }}"
+        validate_certs: no
+      with_items: "{{ sat_contenthosts_remove.results }}"
+      when: >
+        slack_token is defined
+        and slack_user is defined
+        and sat_contenthosts_remove.results is defined
+        and item.skipped is not defined
+        and item.status == 204

@@ -1,0 +1,38 @@
+---
+# Create sync plans
+
+  # Schedule repository synchronization on a set interval
+  - name: Creating sync plan(s)
+    command: >
+      /bin/hammer sync-plan create
+      --organization "{{ initial_org }}"
+      --name "{{ item.name }}"
+      --sync-date "{{ ansible_date_time.date }} {{ item.synctime }}"
+      --interval "{{ item.interval }}"
+      --enabled true
+    register: syncplan_creation
+    with_items: sat_sync_plans
+    failed_when: >
+      syncplan_creation.rc != 0
+      and syncplan_creation.rc != 65
+    changed_when: >
+      syncplan_creation.rc == 0
+    ignore_errors: yes
+
+  # Assign products to be synchronized as part of a plan
+  - name: Assign products to sync plan(s)
+    command: >
+      /bin/hammer product set-sync-plan
+      --organization "{{ initial_org }}"
+      --sync-plan "{{ item.0.name }}"
+      --name "{{ item.1 }}"
+    register: syncproduct_assign
+    with_subelements:
+      - sat_sync_plans
+      - products
+    failed_when: >
+      syncproduct_assign.rc != 0
+      and syncproduct_assign.rc != 65
+    changed_when: >
+      syncproduct_assign.rc == 0
+    ignore_errors: yes

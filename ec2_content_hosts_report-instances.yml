@@ -1,0 +1,13 @@
+{# TEMPLATE - Creates iterable list for content_hosts_report_local.yml #}
+{%- set aws_inventory = [] -%}
+{%- for reservation in sat_ec2_fact.Reservations -%}
+    {%- for instance in reservation.Instances -%}
+      {%- if aws_inventory.append({ "Host": instance.PrivateDnsName | default('NO_INSTANCE_NAME'),
+                               "IP": instance.PrivateIpAddress | default('999.999.999.999'),
+                               "Key": instance.KeyName | default('NO_KEY'),
+                               "AMI": instance.ImageId | default('NO_IMAGE_ID'),
+                               "Tags": instance.Tags | default('NO_TAGS') }) -%}
+      {%- endif -%}
+    {%- endfor -%}
+{%- endfor -%}
+{{ aws_inventory | to_yaml }}

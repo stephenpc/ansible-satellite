@@ -1,0 +1,27 @@
+---
+# Satellite maintenance role
+
+# Load in variables from satellite-content role
+- include_vars: "{{ playbook_dir }}/roles/satellite-content/vars/main.yml"
+
+# Get up to date rpms from Amazon S3 bucket
+- include: s3-update.yml
+  when: >
+    upload_rpms | default(false)
+
+- include: content_views-auto_update.yml
+  when: >
+    autoupdate_content_views | default(false)
+
+# Publish and promote content views based on settings in satellite-content
+- include: content_views-prod_promo.yml
+  when: >
+    promote_content_views_to_prod | default(false)
+
+- include: security.yml
+  when: >
+    security_tweaks | default(false)
+
+- include: restart_katello.yml
+  when: >
+    restart_services | default(false)

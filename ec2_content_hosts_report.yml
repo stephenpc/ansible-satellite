@@ -1,0 +1,94 @@
+---
+# Generate a .csv report on content hosts from the Satellite API and AWS EC2 CLI
+
+- hosts: localhost
+  connection: local
+  become: no
+  gather_facts: yes
+
+  vars_prompt:
+    - name: "satellite_server"
+      prompt: "Enter the fully-qualified hostname of the Satellite server. (Required)"
+      private: no
+    - name: "sat_admin_user"
+      prompt: "Enter your username. (Required, defaults to admin)"
+      default: "admin"
+      private: no
+    - name: "sat_admin_password"
+      prompt: "Enter your password. (Required)"
+      private: yes
+    - name: "satellite_organization_id"
+      prompt: "Enter the organization ID for your Satellite. (Optional, defaults to 1)"
+      default: "1"
+      private: no
+    - name: "aws_region"
+      prompt: "Enter the AWS region. (Optional, defaults to us-east-1)"
+      default: "us-east-1"
+      private: no
+
+  tasks:
+    # Get list of content hosts from the Satellite API
+    - name: Grab current content hosts from Satellite API
+      uri:
+        body_format: json
+        method: GET
+        user: "{{ sat_admin_user }}"
+        password: "{{ sat_admin_password }}"
+        status_code: [ 200, 201 ]
+        url: "https://{{ satellite_server }}/katello/api/systems?organization_id={{ satellite_organization_id | default(1) }}&per_page=5000"
+        validate_certs: no
+        force_basic_auth: yes
+      register: sat_contenthosts_get
+
+    - name: Set content hosts fact
+      set_fact:
+        sat_content_hosts: "{{ sat_contenthosts_get.json.results }}"
+
+    - name: Get EC2 instances
+      command: >
+        aws ec2 describe-instances --region "{{ aws_region }}"
+      register: sat_aws_instances
+      changed_when: no
+
+    - name: Set EC2 instance fact
+      set_fact:
+        sat_ec2_fact: "{{ sat_aws_instances.stdout | from_json }}"
+      no_log: yes
+
+    - name: Set host keys fact
+      set_fact:
+        sat_ec2_hostkey_fact: "{{ lookup('template', 'ec2_content_hosts_report-instances.yml') | from_yaml }}"
+
+    - debug:
+        var: sat_ec2_hostkey_fact
+
+    - name: Create local content host csv
+      lineinfile:
+        dest: "{{ ansible_user_dir }}/{{ satellite_server }}_content_hosts_{{ ansible_date_time.date }}.csv"
+        backup: yes
+        create: yes
+        state: present
+        insertbefore: BOF
+        line: "HOST,IP_ADDRESS,UUID,ACTIVATION_KEY,ENVIRONMENT,DISTRIBUTION,ERRATA,CREATED,LAST_CHECKIN,KATELLO_INSTALLED,SUB_STATUS,HOST_KEY,AMI_ID"
+      no_log: yes
+
+    - name: Add hosts to csv
+      lineinfile:
+        dest: "{{ ansible_user_dir }}/{{ satellite_server }}_content_hosts_{{ ansible_date_time.date }}.csv"
+        backup: no
+        create: yes
+        state: present
+        insertbefore: EOF
+        line: "{{ item.name }},{{ item.name | replace('ec2.internal','') | replace('-','.') }},{{ item.uuid }},{{ item.activation_keys[0].name }},{{ item.environment.name }},{{ item.distribution }},{{ item.errata_counts.total }},{{ item.created | truncate(10,True,'') }},{{ item.checkin_time | truncate(10,True,'') }},{{ item.katello_agent_installed }},{{ item.installedProducts[0].status }},{{ item.name | replace('ec2.internal','') | replace('.','') }}_HOSTKEY,{{ item.name | replace('ec2.internal','') | replace('.','') }}_AMIID"
+      with_items: sat_content_hosts
+      ignore_errors: yes
+      no_log: yes
+
+    - name: Update csv with additional AWS info
+      replace:
+        dest: "{{ ansible_user_dir }}/{{ satellite_server }}_content_hosts_{{ ansible_date_time.date }}.csv"
+        backup: no
+        regexp: "{{ item.Host | replace('ec2.internal','') | replace('.','') }}_HOSTKEY,{{ item.Host | replace('ec2.internal','') | replace('.','') }}_AMIID"
+        replace: "{{ item.Key }},{{ item.AMI }}"
+      with_items: sat_ec2_hostkey_fact
+      no_log: yes

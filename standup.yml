@@ -1,0 +1,26 @@
+---
+# ansible-satellite | Satellite 6.x Orchestration
+
+- hosts: satellite6-server-prod
+  become: yes
+  vars_files:
+    - group_vars/all.yml
+    - group_vars/secrets.yml
+  gather_facts: yes
+  roles:
+    # satellite-install | Install Satellite 6 to a host
+    - role: satellite-install
+    # satellite-setup | Define content that will be available from Satellite
+    - role: satellite-setup
+    # satellite-route53 | Register the system with Amazon Route53 DNS
+    #- role: satellite-route53
+    # satellite-auth | Define users and assign them roles
+    - role: satellite-auth
+      local_users: yes
+      ldap_users: yes
+      ldap_refresh: no
+    # satellite-content | Add repository content so it can be consumed by other hosts
+    - role: satellite-content
+    # satellite-maintenance | Apply maintenance or tweaks
+    - role: satellite-maintenance
+      security_tweaks: yes

@@ -1,0 +1,7 @@
+{%- set contentviews = [] -%}
+{%- for contentview in sat_contentviews_get.json.results -%}
+    {%- for env in contentview.environments -%}
+      {%- if contentviews.append({ "cv_name": contentview.name | default('NONAME-cv'), "org": contentview.organization.name | default('Your Organization'), "env": env.name | default('Library'), "next_version": contentview.next_version | default(0), "version_to_publish": contentview.next_version|int - 1 | default(0) }) -%}{%- endif -%}
+    {%- endfor -%}
+{%- endfor -%}
+{{ contentviews | to_yaml }}

@@ -1,0 +1,17 @@
+---
+# Satellite authentication configuration
+
+# Create local users, defaulting auth source to INTERNAL, first org and location
+- include: local.yml
+  when: >
+    local_users | default(false)
+
+# Set up ability to authenticate to LDAP
+- include: ldap.yml
+  when: >
+    ldap_users | default(false)
+
+# Refresh LDAP users and groups
+- include: ldap_refresh.yml
+  when: >
+    ldap_refresh | default(false)

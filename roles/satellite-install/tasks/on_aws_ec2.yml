@@ -1,0 +1,41 @@
+---
+# EC2 installation considerations
+
+  # Are we installing on an Amazon EC2 RHEL image, receiving updates from RHUI?
+  - name: Determine if Amazon RHUI package is installed
+    command: >
+      /bin/yum list installed rh-amazon-rhui-client
+    register: amazon_rhui_installed
+    changed_when: no
+    failed_when: >
+      amazon_rhui_installed.rc == 0
+    ignore_errors: yes
+
+  # Uninstall the package that provides RHUI to EC2 instances
+  - name: Uninstall Amazon RHUI package
+    yum:
+      name: rh-amazon-rhui-client
+      state: absent
+    when: >
+      amazon_rhui_installed.rc == 0
+
+  # Find Additional RHUI files - CAN USE THIS WHEN ANSIBLE 2 IS RELEASED
+  # - name: Searching for Amazon RHUI configs in /etc/yum.repos.d
+  # find:
+  #    file_type: file
+  #    paths: /etc/yum.repos.d
+  #    patterns: "(.*)rhui(.*)"
+  #    use_regex: True
+  #  register: addl_amazon_rhui_files
+  #  ignore_errors: yes
+
+  # Remove additional RHUI files
+  - name: Ensure RHUI configuration is disabled
+    file:
+      state: absent
+      path: /etc/yum.repos.d/{{ item }}
+    with_items:
+      - "redhat-rhui-client-config.repo"
+      - "redhat-rhui.repo"
+      - "rhui-load-balancers.conf"
+    ignore_errors: yes

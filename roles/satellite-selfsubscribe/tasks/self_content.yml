@@ -1,0 +1,310 @@
+---
+
+# Enable repos from sat_products
+- name: Enable repositories
+  command: >
+    /bin/hammer repository-set enable
+    --organization "{{ initial_org }}"
+    --product "{{ item.0.name }}"
+    --name "{{ item.1.name }}"
+    {{ item.1.options }}
+  register: reposet_enablement
+  with_subelements:
+    - sat_products
+    - repos
+  failed_when: >
+    reposet_enablement.rc != 0
+    and reposet_enablement.rc != 65
+    and reposet_enablement.rc != 70
+  changed_when: >
+    reposet_enablement.rc == 0
+  ignore_errors: yes
+
+# Synchronize Red Hat yum repositories
+- name: Synchronize Red Hat yum repositories in the background
+  command: >
+    /bin/hammer product synchronize
+    --organization "{{ initial_org }}"
+    --name "{{ item.name }}"
+    --async
+  with_items: sat_products
+  ignore_errors: yes
+
+# Assign products to be synchronized as part of a plan
+- name: Assign products to sync plan(s)
+  command: >
+    /bin/hammer product set-sync-plan
+    --organization "{{ initial_org }}"
+    --sync-plan "{{ item.0.name }}"
+    --name "{{ item.1 }}"
+  register: syncproduct_assign
+  with_subelements:
+    - sat_sync_plans
+    - products
+  failed_when: >
+    syncproduct_assign.rc != 0
+    and syncproduct_assign.rc != 65
+  changed_when: >
+    syncproduct_assign.rc == 0
+  ignore_errors: yes
+
+# Wait for primary sync to finish if wait_on_sync is true/yes
+- name: Wait up to 30 minutes or until sync completes
+  shell: >
+    /bin/hammer task list --search Sync | grep -v lock
+  register: hammer_sync_progress
+  until: hammer_sync_progress.stdout.find("running | pending") == -1
+  retries: 30
+  delay: 60
+  changed_when: no
+  ignore_errors: yes
+
+# Figure out what ID the Satellite repo gets
+- name: Determine Satellite Repo ID
+  shell: >
+    /bin/hammer repository list
+    --organization "{{ initial_org }}"
+    --search "*Red\ Hat\ Satellite\ 6.1\ for\ RHEL\ 7\ Server*" | egrep -v "(\-\-\-|PRODUCT)" | awk '{ print $1 }'
+  register: satellite_repository_id
+  ignore_errors: yes
+  changed_when: no
+
+# Add Satellite Repo ID to list
+- name: Set Satellite repository ID fact as list
+  set_fact:
+    satellite_repository_id: "{{ lookup('template', 'satellite_repos.yml') }}"
+
+# Add the Satellite repo id to the repo_ids in vars
+- name: Combine repo_ids and satellite_repository_id
+  set_fact:
+    sat_combined_repo_ids: "{{ sat_content_views[0].repo_ids + satellite_repository_id[0] | list }}"
+
+# Build out each lifecycle environment
+- name: Creating lifecycle environments
+  command: >
+    /bin/hammer lifecycle-environment create
+    --organization "{{ initial_org }}"
+    --name "{{ item.env }}"
+    --description "{{ item.env }} Environment"
+    --prior "{{ item.prior }}"
+  register: create_lifecycle_env
+  with_items: sat_lifecycle
+  failed_when: >
+    create_lifecycle_env.rc != 0
+    and create_lifecycle_env.rc != 65
+  changed_when: >
+    create_lifecycle_env.rc == 0
+
+# Set up initial content views
+- name: Creating content view(s)
+  command: >
+    /bin/hammer content-view create
+    --organization "{{ initial_org }}"
+    --name "{{ item.name }}"
+    --description "{{ item.description }}"
+  register: create_content_view
+  with_items: sat_content_views
+  failed_when: >
+    create_content_view.rc != 0
+    and create_content_view.rc != 65
+  changed_when: >
+    create_content_view.rc == 0
+
+# Update content views that were already created
+- name: Updating defined content view(s)
+  command: >
+    /bin/hammer content-view update
+    --organization "{{ initial_org }}"
+    --name "{{ item.item.name }}"
+    --description "{{ item.item.description }}"
+  register: update_content_view
+  with_items: create_content_view.results
+  failed_when: >
+    update_content_view.rc != 0
+  changed_when: >
+    update_content_view.rc == 0
+  when: >
+    item.rc == 65
+
+# Assign repos to a content view
+- name: Assign repositories to content views via repository ids
+  command: >
+    /bin/hammer content-view update
+    --organization "{{ initial_org }}"
+    --name "{{ item.name }}"
+    --repository-ids "{{ sat_combined_repo_ids |list| join(',') }}"
+  register: update_content_view
+  with_items: sat_content_views
+  failed_when: >
+    update_content_view.rc != 0
+    and update_content_view.rc != 65
+  changed_when: >
+    update_content_view.rc == 0
+
+# Create content date filters
+- name: Creating content view date filter(s)
+  command: >
+    /bin/hammer content-view filter create
+    --organization "{{ initial_org }}"
+    --name "{{ item.name }}"
+    --content-view "{{ item.applytocv }}"
+    --inclusion "{{ item.inclusion | default(no) }}"
+    --type "{{ item.type | default(erratum) }}"
+  register: create_content_date_filter
+  with_items: sat_content_date_filters
+  failed_when: >
+    create_content_date_filter.rc != 0
+    and create_content_date_filter.rc != 65
+  changed_when: >
+    create_content_date_filter.rc == 0
+  when: >
+    sat_content_date_filters is defined
+
+# Add content filter rules by date
+- name: Add content filter rules by start date
+  command: >
+    /bin/hammer content-view filter rule create
+    --organization "{{ initial_org }}"
+    --content-view "{{ item.applytocv }}"
+    --content-view-filter "{{ item.name }}"
+    --start-date "{{ item.start_date }}"
+    --types "{{ item.errata_types | join(',') | default('security,enhancement,bugfix') }}"
+    --date-type "{{ item.date_type | default('issued') }}"
+  register: add_content_date_rule
+  with_items: sat_content_date_filters
+  failed_when: >
+    add_content_date_rule.rc != 0
+    and add_content_date_rule.rc != 65
+  changed_when: >
+    add_content_date_rule.rc == 0
+  when: >
+    sat_content_date_filters is defined
+
+# Apply date filter to repositories
+- name: Applying repository restrictions to date filters
+  command: >
+    /bin/hammer content-view filter update
+    --organization "{{ initial_org }}"
+    --name "{{ item.name }}"
+    --content-view "{{ item.applytocv }}"
+    --repository-ids "{{ item.repo_ids | join(',') }}"
+  register: apply_content_date_filter_repo
+  with_items: sat_content_date_filters
+  failed_when: >
+    apply_content_date_filter_repo.rc != 0
+    and apply_content_date_filter_repo.rc != 65
+  changed_when: >
+    apply_content_date_filter_repo.rc == 0
+  when: >
+    item.repo_ids is defined
+
+# Publish the initial version of each view
+- name: Publish content views to the Library environment
+  command: >
+    /bin/hammer content-view publish
+    --organization "{{ initial_org }}"
+    --name "{{ item.name }}"
+  register: publish_content_view
+  with_items: sat_content_views
+  failed_when: >
+    publish_content_view.rc != 0
+    and publish_content_view.rc != 65
+  changed_when: >
+    publish_content_view.rc == 0
+  ignore_errors: yes
+
+# Promote initial content views beyond Library environment
+- name: Promote initial content views from the Library to their respective environments
+  command: >
+    /bin/hammer content-view version promote
+    --organization "{{ initial_org }}"
+    --content-view "{{ item.0.name }}"
+    --to-lifecycle-environment "{{ item.1 }}"
+    --version "1.0"
+  register: promote_content_view
+  with_subelements:
+    - sat_content_views
+    - env
+  when: >
+    "{{ item.1 }}" != "Library"
+  failed_when: >
+    promote_content_view.rc != 0
+    and promote_content_view.rc != 65
+  changed_when: >
+    promote_content_view.rc == 0
+  ignore_errors: yes
+
+# Set up initial activation key(s)
+- name: Creating activation key(s)
+  command: >
+    /bin/hammer activation-key create
+    --organization "{{ initial_org }}"
+    --name "{{ item.name }}"
+    --content-view "{{ item.content_view }}"
+    --lifecycle-environment "{{ item.lifecycle_env }}"
+  register: create_activation_keys
+  with_items: sat_activation_keys
+  failed_when: >
+    create_activation_keys.rc != 0
+    and create_activation_keys.rc != 65
+  changed_when: >
+    create_activation_keys.rc == 0
+
+# Set activation key release versions
+- name: Updating activation key release versions
+  command: >
+    /bin/hammer activation-key update
+    --organization "{{ initial_org }}"
+    --name "{{ item.name }}"
+    --release-version "{{ item.releasever }}"
+  register: update_activation_keys_rv
+  with_items: sat_activation_keys
+  failed_when: >
+    update_activation_keys_rv.rc != 0
+    and update_activation_keys_rv.rc != 65
+  changed_when: >
+    update_activation_keys_rv.rc == 0
+  ignore_errors: yes
+
+# Figure out what subscriptions are available to this Satellite server
+- name: Obtaining All Subscription IDs
+  shell: >
+    /bin/hammer subscription list
+    --organization "{{ initial_org }}" | awk -F"|" '{ print $8 }' | column -t | egrep -vi "(--|ID)"
+  register: all_subscription_ids
+  changed_when: no
+
+# Add subscriptions to each activation key so that we can adjust content on a key basis
+- name: Add subscription to activation key(s)
+  command: >
+    /bin/hammer activation-key add-subscription
+    --organization "{{ initial_org }}"
+    --name "{{ item[0].name }}"
+    --subscription-id "{{ item[1] }}"
+  register: add_activation_key_sub
+  with_nested:
+    - "{{ sat_activation_keys }}"
+    - "{{ all_subscription_ids.stdout_lines }}"
+  failed_when: >
+    add_activation_key_sub.rc != 0
+    and add_activation_key_sub.rc != 65
+  changed_when: >
+    add_activation_key_sub.rc == 0
+
+# Override default values for each subscription specified
+- name: Override content defaults to enable needed repos for activation key(s)
+  command: >
+    /bin/hammer activation-key content-override
+    --organization "{{ initial_org }}"
+    --name "{{ item.0.name }}"
+    --content-label "{{ item.1 }}"
+    --value 1
+  register: ak_content_override
+  with_subelements:
+    - sat_activation_keys
+    - repo_overrides
+  failed_when: >
+    ak_content_override.rc != 0
+    and ak_content_override.rc != 65
+  changed_when: >
+    ak_content_override.rc == 0

@@ -1,0 +1,47 @@
+---
+# Satellite basic authentication configuration
+
+# Create local users, defaulting auth source to INTERNAL, first org and location
+- name: Create local users
+  command: >
+    /bin/hammer user create
+    --admin "{{ item.administrator | default(no) }}"
+    --login "{{ item.username }}"
+    --password "{{ item.password }}"
+    --mail "{{ item.email }}"
+    --firstname "{{ item.first_name }}"
+    --lastname "{{ item.last_name }}"
+    --organizations "{{ item.organizations | join(',') }}"
+    --locations "{{ item.locations | join(',') }}"
+    --default-organization-id "{{ item.default_org_id | default(1) }}"
+    --default-location-id "{{ item.default_loc_id | default(2) }}"
+    --auth-source-id "{{ item.auth_source_id | default(1) }}"
+  register: sat_create_localuser
+  with_items: sat_local_users
+  changed_when: >
+    sat_create_localuser.rc == 0
+  failed_when: >
+    sat_create_localuser.rc != 0
+    and sat_create_localuser.rc != 65
+  when: >
+    sat_local_users is defined
+  no_log: yes
+
+# Add roles to a local user
+- name: Assign user roles
+  command: >
+    /bin/hammer user add-role
+    --login "{{ item.0.username }}"
+    --role "{{ item.1 }}"
+  register: sat_addrole_localuser
+  with_subelements:
+    - sat_local_users
+    - roles
+  changed_when: >
+    sat_addrole_localuser.rc == 0
+  failed_when: >
+    sat_addrole_localuser.rc != 0
+    and sat_addrole_localuser.rc != 65
+  when: >
+    sat_local_users is defined
+  no_log: yes

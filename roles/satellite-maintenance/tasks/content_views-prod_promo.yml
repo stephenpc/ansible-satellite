@@ -1,0 +1,60 @@
+---
+# Promote the latest version of content views to production
+
+# Get existing content views from Satellite server
+- name: Get existing content views
+  become: no
+  local_action:
+    module: uri
+    body_format: json
+    method: GET
+    user: admin
+    password: "{{ sat_admin_password }}"
+    status_code: [ 200, 201 ]
+    url: "https://{{ satellite_server }}/katello/api/v2/content_views?per_page=5000"
+    validate_certs: no
+    force_basic_auth: yes
+  register: sat_contentviews_get
+
+# Transform content view filters data
+- name: Set content view fact
+  set_fact:
+    sat_contentviews_fact: "{{ lookup('template', 'content_views.yml') | from_yaml }}"
+
+- name: Alert Satellite channel in Slack - Making content available to prod
+  slack:
+    token: "{{ slack_token }}"
+    msg: "`{{ sat_hostname }}` | _Making RPM packages and patches up to {{ ansible_date_time.month }}.{{ ansible_date_time.day }}.{{ ansible_date_time.year }} available to *PRODUCTION* systems..._"
+    username: "{{ slack_user }}"
+    validate_certs: no
+  when: >
+    slack_pubpromo_notify | default(true)
+
+# Promote latest version of content views from the Library to production environments
+- name: Promote latest version of content views from the Library to production environments
+  command: >
+    /bin/hammer content-view version promote
+    --organization "{{ item.org }}"
+    --content-view "{{ item.cv_name}}"
+    --to-lifecycle-environment "{{ item.env }}"
+    --version "{{ item.version_to_publish }}.0"
+  register: promote_content_view
+  with_items: sat_contentviews_fact
+  when: >
+    item.env|lower|search(".*_prod.*")
+  failed_when: >
+    promote_content_view.rc != 0
+    and promote_content_view.rc != 65
+  changed_when: >
+    promote_content_view.rc == 0
+
+- name: Alert Satellite channel in Slack - What was updated in prod
+  slack:
+    token: "{{ slack_token }}"
+    msg: "`{{ sat_hostname }}` | _Updated content in *{{ item.item.cv_name }}* is available to hosts subscribed in the *{{ item.item.env }}* environment. Software packages are current to {{ ansible_date_time.month }}.{{ ansible_date_time.day }}.{{ ansible_date_time.year }}._"
+    username: "{{ slack_user }}"
+    validate_certs: no
+  with_items: promote_content_view.results
+  when: >
+    slack_pubpromo_notify | default(true)
+    and item|changed

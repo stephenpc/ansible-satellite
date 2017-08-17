@@ -1,0 +1,17 @@
+{%- set contentview_packagefilters = [] -%}
+{%- for contentview in sat_contentviewfilters_get.results -%}
+    {%- for filter in contentview.json.results -%}
+      {%- if filter.type == 'rpm' -%}
+        {%- if contentview_packagefilters.append({ "content_view_id": filter.content_view.id | default(0),
+                                                   "content_view_name": filter.content_view.name | default('NO_CV_NAME'),
+                                                   "id": filter.id | default(0),
+                                                   "name": filter.name | default('NO_NAME'),
+                                                   "type": filter.type | default('NO_TYPE'),
+                                                   "is_inclusion": filter.inclusion | default(true),
+                                                   "rules": filter.rules | default(['NO_RULES']),
+                                                   "repositories": filter.repositories | map(attribute='id') | list | default(['NO_REPOSITORIES']) }) -%}
+        {%- endif -%}
+      {%- endif -%}
+    {%- endfor -%}
+{%- endfor -%}
+{{ contentview_packagefilters | to_yaml }}

@@ -1,0 +1,43 @@
+---
+# Restart services on the Satellite Server
+
+# Post update via Slack
+- name: Alert Satellite channel in Slack - restarting Katello
+  slack:
+    token: "{{ slack_token }}"
+    msg: "`{{ sat_hostname }}` | _Restart of Satellite services in progress!_"
+    username: "{{ slack_user }}"
+    validate_certs: no
+
+# Call a restart of all katello services
+- name: Restart katello-service
+  command: >
+    /bin/katello-service restart
+  register: katello_restart
+  ignore_errors: yes
+
+# Display registered katello_restart variable from previous task
+- name: Dump restart info to Ansible Tower console
+  debug:
+    var: katello_restart
+
+# Wait for a minute
+- name: Wait for services to come up
+  pause:
+    minutes: 1
+    prompt: "Waiting for services to come up..."
+
+# Get a status of Satellite services
+- name: Check Satellite server status
+  shell: >
+    /bin/hammer ping
+  register: satellite_status
+  ignore_errors: yes
+
+# Post update via Slack
+- name: Alert Satellite channel in Slack - service status
+  slack:
+    token: "{{ slack_token }}"
+    msg: "`{{ sat_hostname }}` | _Service Status_ \n\n {{ satellite_status.stdout | replace('ok','_ok_') | replace('failed','*failed*') }}"
+    username: "{{ slack_user }}"
+    validate_certs: no

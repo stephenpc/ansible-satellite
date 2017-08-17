@@ -1,0 +1,59 @@
+---
+# satellite-selfsubscribe vars
+
+# GET CONTENT
+sat_products:
+  - name: "Red Hat Satellite"
+    repos:
+      - name: "Red Hat Satellite 6.1 (for RHEL 7 Server) (RPMs)"
+        options: "--basearch x86_64"
+
+sat_sync_plans:
+  - name: "Red Hat Daily Sync"
+    interval: daily
+    synctime: "01:00:00"
+    products:
+      - "Red Hat Satellite"
+
+# MAKE CONTENT AVAILABLE
+sat_lifecycle:
+  - env: "Satellite_NonProd"
+    prior: "Library"
+  - env: "Satellite_Prod"
+    prior: "Satellite_NonProd"
+
+sat_content_views:
+  - name: "satellite-cv"
+    description: "satellite - errata inclusions to 04.26.2016"
+    env: [ 'Library', 'Satellite_NonProd', 'Satellite_Prod' ]
+    repo_ids: [ '1', '7', '24' ]
+
+sat_content_date_filters:
+  - name: "satellite-dated_to_04262016-errata-filter"
+    inclusion: no
+    type: erratum
+    applytocv: "satellite-cv"
+    start_date: "2016-04-26"
+    date_type: updated
+    errata_types:
+      - "security"
+      - "enhancement"
+      - "bugfix"
+
+sat_activation_keys:
+  - name: "satellite_non-ak"
+    content_view: "satellite-cv"
+    lifecycle_env: "Satellite_NonProd"
+    releasever: "7Server"
+    repo_overrides:
+      - "rhel-7-server-satellite-6.1-rpms"
+      - "rhel-7-server-satellite-tools-6.1-rpms"
+      - "rhel-server-rhscl-7-rpms"
+  - name: "satellite_prod-ak"
+    content_view: "satellite-cv"
+    lifecycle_env: "Satellite_Prod"
+    releasever: "7Server"
+    repo_overrides:
+      - "rhel-7-server-satellite-6.1-rpms"
+      - "rhel-7-server-satellite-tools-6.1-rpms"
+      - "rhel-server-rhscl-7-rpms"

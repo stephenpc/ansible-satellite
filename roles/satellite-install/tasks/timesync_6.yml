@@ -1,0 +1,13 @@
+---
+# NTP setup for RHEL6
+
+  - name: Install ntpd
+    yum:
+      name: ntpd
+      state: latest
+
+  - name: Enable ntpd service
+    service:
+      name: ntpd
+      state: started
+      enabled: yes

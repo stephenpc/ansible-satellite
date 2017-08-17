@@ -1,0 +1,7 @@
+{%- set contentviewfilters = [] -%}
+{%- for contentview in sat_contentviewfilters_get.results -%}
+    {%- for filter in contentview.json.results -%}
+      {%- if contentviewfilters.append({ "viewid": filter.content_view.id | default(0), "filterid": filter.id | default(0) }) -%}{%- endif -%}
+    {%- endfor -%}
+{%- endfor -%}
+{{ contentviewfilters | to_yaml }}

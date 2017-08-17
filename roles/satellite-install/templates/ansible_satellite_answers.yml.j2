@@ -1,0 +1,57 @@
+---
+# Answers for katello-installer
+# THIS FILE IS MANAGED BY ANSIBLE AND MAY BE OVERWRITTEN
+
+certs:
+  generate: true
+  deploy: true
+  group: foreman
+katello: true
+foreman:
+  admin_username: admin
+  admin_email: "{{ sat_admin_email }}"
+  admin_password: "{{ sat_admin_password }}"
+  admin_first_name: "{{ sat_admin_firstname }}"
+  admin_last_name: "{{ sat_admin_lastname }}"
+  organizations_enabled: true
+  locations_enabled: true
+  custom_repo: true
+  configure_epel_repo: false
+  configure_scl_repo: false
+  ssl: true
+  server_ssl_cert: /etc/pki/katello/certs/katello-apache.crt
+  server_ssl_key: /etc/pki/katello/private/katello-apache.key
+  server_ssl_ca: /etc/pki/katello/certs/katello-default-ca.crt
+  server_ssl_chain: /etc/pki/katello/certs/katello-default-ca.crt
+  websockets_encrypt: true
+  websockets_ssl_key: /etc/pki/katello/private/katello-apache.key
+  websockets_ssl_cert: /etc/pki/katello/certs/katello-apache.crt
+capsule:
+  register_in_foreman: true
+  pulp_master: true
+  puppet: true
+  puppetca: true
+  templates: false
+
+foreman::plugin::bootdisk: true
+foreman::plugin::discovery: false #http://projects.theforeman.org/issues/9200
+foreman::plugin::hooks: true
+foreman::plugin::tasks: true
+foreman::plugin::chef: false
+foreman::plugin::default_hostgroup: false
+foreman::plugin::puppetdb: false
+foreman::plugin::setup: false
+foreman::plugin::templates: false
+
+katello::plugin::gutterball: true
+
+# Issue #4244 - Commenting these out due to the seg fault
+# caused on Ruby 1.8.7, the Katello RPM ensures these
+# are installed instead
+#foreman::compute::ec2: true
+#foreman::compute::gce: true
+#foreman::compute::libvirt: true
+#foreman::compute::openstack: false
+#foreman::compute::ovirt: true
+#foreman::compute::rackspace: false
+#foreman::compute::vmware: true

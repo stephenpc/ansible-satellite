@@ -1,0 +1,14 @@
+---
+# Service handlers
+
+  # Restart FirewallD
+  - name: Restart FirewallD
+    service: 
+      name: firewalld
+      state: reloaded
+
+  # Restart Iptables
+  - name: Restart Iptables
+    service: 
+      name: iptables 
+      state: restarted

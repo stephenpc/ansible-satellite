@@ -1,0 +1,3 @@
+*.inv
+.vagrant
+.git

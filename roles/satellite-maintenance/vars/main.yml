@@ -1,0 +1,19 @@
+---
+# satellite-maintenance vars
+
+apache_confd: "/etc/httpd/conf.d"
+
+# General settings for auto generation of future package filters
+sat_content_orchestration:
+  package_filters:
+    inclusion: yes
+    type: rpm
+  date_filters:
+    inclusion: no
+    type: erratum
+    start_date: "{{ ansible_date_time.year }}-{{ ansible_date_time.month }}-{{ ansible_date_time.day }}"
+    date_type: updated
+    errata_types:
+      - "security"
+      - "enhancement"
+      - "bugfix"

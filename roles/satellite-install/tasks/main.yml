@@ -1,0 +1,155 @@
+---
+# Satellite installation
+
+  - name: Fail if no Red Hat Subscription Manager authentication data is passed to the role
+    fail: msg="You must pass authentication data to this role. See README.md for more information."
+    when: >
+      (rhn_user is not defined or rhn_pass is not defined)
+      and rhn_activation_key is not defined
+
+  - name: Ensure our Linux distribution is RHEL 6.5 or higher
+    assert:
+      that:
+        - "'{{ ansible_distribution }}' == 'RedHat'"
+        - "{{ ansible_distribution_version }} >= 6.5"
+
+  # http://stopdisablingselinux.com/
+  - name: Make sure that SELinux is set to enforcing mode
+    assert:
+      that:
+        - "'{{ ansible_selinux.config_mode }}' == 'enforcing'"
+        - "'{{ ansible_selinux.mode }}' == 'enforcing'"
+        - "'{{ ansible_selinux.status }}' == 'enabled'"
+
+  - name: Check for presence of Katello package
+    command: >
+      /bin/yum list installed katello
+    register: katello_installed
+    changed_when: no
+    failed_when: no
+    ignore_errors: yes
+
+  - name: Check for presence of Puppet package
+    command: >
+      /bin/yum list installed puppet
+    register: puppet_installed
+    changed_when: no
+    failed_when: no
+    ignore_errors: yes
+
+  - name: Fail if Puppet is already installed without the presence of Katello
+    fail: msg="Katello cannot be installed when a conflicting version of Puppet is installed."
+    when: >
+      puppet_installed.rc == 0
+      and katello_installed.rc == 1
+
+  - name: Check for Java in $PATH
+    command: >
+      /usr/bin/which java
+    register: java_in_path
+    changed_when: no
+    failed_when: no
+    ignore_errors: yes
+
+  - name: Fail if Java is already installed without the presence of Katello
+    fail: msg="Katello cannot be installed when a conflicting version of Java is installed."
+    when: >
+      java_in_path.rc == 0
+      and katello_installed.rc == 1
+
+  # Make sure we can resolve hostnames and Red Hat endpoints
+  - include: dns_checks.yml
+
+  # Subscribe the system to Red Hat
+  - include: redhat_subscription.yml
+
+  # Installs and activates time sync. This is required for Foreman to function
+  - include: timesync_6.yml
+    when: >
+      ansible_distribution_major_version | int == 6
+
+  - include: timesync_7.yml
+    when: >
+      ansible_distribution_major_version | int == 7
+
+  # Installs and configures firewall- comment out to leave firewall out
+  - include: firewall_6.yml
+    when: >
+      ansible_distribution_major_version | int == 6
+
+  - include: firewall_7.yml
+    when: >
+      ansible_distribution_major_version | int == 7
+
+  # Installs packages that are recommended, but not required
+  - include: recommended_packages.yml
+
+  # Need the katello-installer to install Satellite
+  - name: Download and install the Katello package
+    yum:
+      name: katello
+      state: present
+
+  # Overrides defaults for the installer
+  - name: Copy Katello installer answer file into place
+    template:
+      src: ansible_satellite_answers.yml.j2
+      dest: /etc/katello-installer/ansible_satellite_answers.yml
+      mode: 0400
+    register: copied_answer_file
+
+  - name: Point Katello installer at the answer file
+    lineinfile:
+      dest: /etc/katello-installer/katello-installer.yaml
+      state: present
+      regexp: '^(.*)answer_file'
+      line: '  :answer_file: /etc/katello-installer/ansible_satellite_answers.yml'
+
+  # Use third-party issued certificates
+  - include: ssl.yml
+    when: >
+      custom_ssl.use | default(no)
+
+  # Run the Satellite install with the system prepped
+  - name: Run Katello installer with default SSL
+    command: /sbin/katello-installer -v
+    environment:
+      TERM: dumb
+      LANG: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+    when: >
+      copied_answer_file.changed
+      and not custom_ssl.use | default(no)
+
+  # Run the Satellite install using third-party certificates
+  - name: Run Katello installer with third-party SSL
+    command: /sbin/katello-installer -v \
+              --certs-server-cert {{ custom_ssl.file_loc }}/{{ custom_ssl.pki.cert }} \
+              --certs-server-cert-req {{ custom_ssl.file_loc }}/{{ custom_ssl.pki.csr }} \
+              --certs-server-key {{ custom_ssl.file_loc }}/{{ custom_ssl.pki.key }} \
+              --certs-server-ca-cert {{ custom_ssl.file_loc }}/{{ custom_ssl.pki.root }}
+    environment:
+      TERM: dumb
+      LANG: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+    when: >
+      copied_answer_file.changed
+      and custom_ssl.use | default(no)
+
+  # Initial restart of firewalld
+  - name: Restart FirewallD
+    service:
+      name: firewalld
+      state: reloaded
+    when: >
+      ansible_distribution_major_version | int == 7
+    ignore_errors: yes
+
+  # Initial restart of iptables
+  - name: Restart Iptables
+    service:
+      name: iptables
+      state: restarted
+    when: >
+      ansible_distribution_major_version | int == 6
+    ignore_errors: yes

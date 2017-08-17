@@ -1,0 +1,41 @@
+---
+# DNS resolution prerequisites
+
+  - name: Set server hostname
+    hostname:
+      name: "{{ sat_hostname }}.{{ sat_domain }}"
+
+  - name: Confirm DNS resolution for localhost
+    command: >
+      /bin/ping -c1 localhost
+    changed_when: no
+
+  - name: Add an entry to /etc/hosts for the configured and previous host names
+    lineinfile:
+      backup: yes
+      dest: /etc/hosts
+      insertafter: EOF
+      line: "{{ ansible_default_ipv4.address }}\t{{ sat_hostname }}.{{ sat_domain }}\t{{ sat_hostname }}\t{{ ansible_fqdn }}"
+
+  - name: Confirm DNS resoultion for short domain name of this host
+    shell: >
+      /bin/ping -c1 $(/bin/hostname -s)
+    changed_when: no
+
+  - name: Confirm DNS resolution for fully-qualified domain name of this host
+    shell: >
+      /bin/ping -c1 $(/bin/hostname -f)
+    changed_when: no
+
+  # Check to see if we can resolve Red Hat services for registering the system
+  - name: Confirm DNS resolution and ability to connect via HTTP for Red Hat Subscription Service
+    command: >
+      /bin/curl -vvv -G http://subscription.rhn.redhat.com
+    changed_when: no
+    ignore_errors: yes
+
+  - name: Confirm DNS resolution and ability to connect via HTTP for Red Hat CDN
+    command: >
+      /bin/curl -vvv -G http://cdn.redhat.com
+    changed_when: no
+    ignore_errors: yes

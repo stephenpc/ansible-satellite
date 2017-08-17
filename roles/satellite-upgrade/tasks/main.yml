@@ -1,0 +1,108 @@
+---
+# Satellite 6.1.x in-place ugprade steps
+
+# Let Slack channel know about the upgrade start
+- name: Slack notification - maintenance start
+  slack:
+    token: "{{ slack_token }}"
+    msg: "`{{ sat_hostname }}` | _Satellite server *{{ satellite_server }}* is starting maintenance for an upgrade..._"
+    username: "{{ slack_user }}"
+    validate_certs: no
+  when: >
+    slack_upgrade_notify | default(yes)
+  changed_when: no
+
+# Ensure hostname is set correctly
+- name: Reset hostname to match config
+  hostname:
+    name: "{{ sat_hostname }}.{{ sat_domain }}"
+
+# Yum update
+- name: Install updated system packages
+  yum:
+    name: "*"
+    state: latest
+    update_cache: yes
+
+# Flush Katello services
+- name: Restart Satellite (Katello) services
+  command: >
+    /bin/katello-service restart
+  changed_when: no
+
+# Shut down Katello
+- name: Stop Satellite (Katello) services
+  command: >
+    /bin/katello-service stop
+  changed_when: no
+
+# Start up Mongo so ugprade can talk to the database
+- name: Start Mongo
+  service:
+    name: mongod
+    state: started
+  changed_when: no
+
+# Run the Satellite (Katello) upgrade with the system prepped
+- name: Run the Satellite (Katello) upgrade
+  command: /sbin/katello-installer -v --upgrade
+  environment:
+    TERM: dumb
+    LANG: en_US.UTF-8
+    LC_ALL: en_US.UTF-8
+  ignore_errors: yes
+
+# Let Slack channel know about the upgrade end
+- name: Slack notification - rebooting Satellite
+  slack:
+    token: "{{ slack_token }}"
+    msg: "`{{ sat_hostname }}` | _Satellite server *{{ satellite_server }}* is scheduled for immediate reboot..._"
+    username: "{{ slack_user }}"
+    validate_certs: no
+  when: >
+    slack_upgrade_notify | default(yes)
+  changed_when: no
+
+# Restart the system
+- name: Reboot Satellite server
+  shell: >
+    sleep 5; /bin/systemctl reboot
+  async: 1
+  poll: 0
+  ignore_errors: yes
+  failed_when: no
+
+# Verify that system restarted and is accessible via SSH
+- name: Check for system to be available via SSH
+  become: no
+  local_action:
+    module: wait_for
+    host: "{{ satellite_server }}"
+    port: 22
+    delay: 60
+    timeout: 600
+    state: started
+  ignore_errors: yes
+
+# Verify that GUI is accessilble
+- name: Check for web server connectivity
+  become: no
+  local_action:
+    module: wait_for
+    host: "{{ satellite_server }}"
+    port: 443
+    delay: 60
+    timeout: 600
+    state: started
+  ignore_errors: yes
+
+# Let Slack channel know about the upgrade end
+- name: Slack notification - maintenance end
+  slack:
+    token: "{{ slack_token }}"
+    msg: "`{{ sat_hostname }}` | _Satellite server *{{ satellite_server }}* is ending maintenance for an upgrade..._"
+    username: "{{ slack_user }}"
+    validate_certs: no
+  when: >
+    slack_upgrade_notify | default(yes)
+  changed_when: no

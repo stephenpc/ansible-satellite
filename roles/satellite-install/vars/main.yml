@@ -1,0 +1,23 @@
+---
+# satellite-install vars
+
+# Enumerate services and ports to be opened in the firewall
+sat_firewalld_rules:
+  # HTTPS
+  - service: https
+  # HTTP
+  - service: http
+  # Satellite SSL
+  - port: 5671/tcp
+  # Katello Qpid
+  - port: 5647/tcp
+  # Tomcat
+  - port: 8080/tcp
+  # Puppet
+  - port: 8140/tcp
+  # Foreman
+  - port: 9090/tcp
+  # Crane
+  - port: 5000/tcp
+  # Zabbix
+  - port: 10050/tcp

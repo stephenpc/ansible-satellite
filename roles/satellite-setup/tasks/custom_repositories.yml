@@ -1,0 +1,35 @@
+---
+# Custom repositories
+
+  # Create products
+  - name: Create additional products
+    command: >
+      /bin/hammer product create
+      --organization "{{ initial_org }}"
+      --name "{{ item.name }}"
+    register: create_addl_prod
+    with_items: sat_custom_products
+    failed_when: >
+      create_addl_prod.rc != 0
+      and create_addl_prod.rc != 65
+    changed_when: >
+      create_addl_prod.rc == 0
+
+  # Create yum repositories for the products
+  - name: Create additional yum repositories
+    command: >
+      /bin/hammer repository create
+      --organization "{{ initial_org }}"
+      --product "{{ item.0.name }}"
+      --name "{{ item.1.name }}"
+      --content-type "yum"
+      {{ item.1.options }}
+    register: create_addl_repo
+    with_subelements:
+      - sat_custom_products
+      - repos
+    failed_when: >
+      create_addl_repo.rc != 0
+      and create_addl_repo.rc != 65
+    changed_when: >
+      create_addl_repo.rc == 0

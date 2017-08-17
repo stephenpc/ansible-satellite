@@ -1,0 +1,161 @@
+---
+# satellite-setup vars
+
+# Define Red Hat products and repositories
+sat_products:
+  - name: "Red Hat Enterprise Linux Server"
+    repos:
+      - name: "Red Hat Enterprise Linux 7 Server (RPMs)"
+        options: "--releasever 7Server --basearch x86_64"
+      - name: "Red Hat Enterprise Linux 7 Server (RPMs)"
+        options: "--releasever 7.1 --basearch x86_64"
+      - name: "Red Hat Enterprise Linux 7 Server (RPMs)"
+        options: "--releasever 7.2 --basearch x86_64"
+      - name: "Red Hat Enterprise Linux 7 Server - Optional (RPMs)"
+        options: "--releasever 7Server --basearch x86_64"
+      - name: "Red Hat Enterprise Linux 7 Server - Optional (RPMs)"
+        options: "--releasever 7.1 --basearch x86_64"
+      - name: "Red Hat Enterprise Linux 7 Server - Optional (RPMs)"
+        options: "--releasever 7.2 --basearch x86_64"
+      - name: "Red Hat Satellite Tools 6.1 (for RHEL 7 Server) (RPMs)"
+        options: "--basearch x86_64"
+      - name: "Red Hat Enterprise Linux 7 Server - Extras (RPMs)"
+        options: "--basearch x86_64"
+  - name: "Red Hat Enterprise Linux Server - Extended Update Support"
+    repos:
+      - name: "Red Hat Enterprise Linux 7 Server - Extended Update Support (RPMs)"
+        options: "--releasever 7Server --basearch x86_64"
+      - name: "Red Hat Enterprise Linux 7 Server - Extended Update Support (RPMs)"
+        options: "--releasever 7.1 --basearch x86_64"
+      - name: "Red Hat Enterprise Linux 7 Server - Extended Update Support (RPMs)"
+        options: "--releasever 7.2 --basearch x86_64"
+      - name: "Red Hat Enterprise Linux 7 Server - Extended Update Support - Optional (RPMs)"
+        options: "--releasever 7Server --basearch x86_64"
+      - name: "Red Hat Enterprise Linux 7 Server - Extended Update Support - Optional (RPMs)"
+        options: "--releasever 7.1 --basearch x86_64"
+      - name: "Red Hat Enterprise Linux 7 Server - Extended Update Support - Optional (RPMs)"
+        options: "--releasever 7.2 --basearch x86_64"
+      - name: "Red Hat Enterprise Linux 7 Server - Extended Update Support - Supplementary (RPMs)"
+        options: "--releasever 7Server --basearch x86_64"
+      - name: "Red Hat Enterprise Linux 7 Server - Extended Update Support - Supplementary (RPMs)"
+        options: "--releasever 7.1 --basearch x86_64"
+      - name: "Red Hat Enterprise Linux 7 Server - Extended Update Support - Supplementary (RPMs)"
+        options: "--releasever 7.2 --basearch x86_64"
+      - name: "Red Hat Enterprise Linux 7 Server - Extended Update Support - RH Common (RPMs)"
+        options: "--releasever 7Server --basearch x86_64"
+      - name: "Red Hat Enterprise Linux 7 Server - Extended Update Support - RH Common (RPMs)"
+        options: "--releasever 7.1 --basearch x86_64"
+      - name: "Red Hat Enterprise Linux 7 Server - Extended Update Support - RH Common (RPMs)"
+        options: "--releasever 7.2 --basearch x86_64"
+      - name: "Red Hat Satellite Tools 6.1 (for RHEL 7 Server - EUS) (RPMs)"
+        options: "--releasever 7Server --basearch x86_64"
+      - name: "Red Hat Satellite Tools 6.1 (for RHEL 7 Server - EUS) (RPMs)"
+        options: "--releasever 7.1 --basearch x86_64"
+      - name: "Red Hat Satellite Tools 6.1 (for RHEL 7 Server - EUS) (RPMs)"
+        options: "--releasever 7.2 --basearch x86_64"
+  - name: "Red Hat Software Collections for RHEL Server"
+    repos:
+      - name: "Red Hat Software Collections RPMs for Red Hat Enterprise Linux 7 Server"
+        options: "--releasever 7Server --basearch x86_64"
+      - name: "Red Hat Software Collections RPMs for Red Hat Enterprise Linux 7 Server"
+        options: "--releasever 7.1 --basearch x86_64"
+      - name: "Red Hat Software Collections RPMs for Red Hat Enterprise Linux 7 Server"
+        options: "--releasever 7.2 --basearch x86_64"
+  - name: "Oracle Java for RHEL Server"
+    repos:
+      - name: "Red Hat Enterprise Linux 7 Server - Oracle Java (RPMs)"
+        options: "--releasever 7Server --basearch x86_64"
+      - name: "Red Hat Enterprise Linux 7 Server - Oracle Java (RPMs)"
+        options: "--releasever 7.1 --basearch x86_64"
+      - name: "Red Hat Enterprise Linux 7 Server - Oracle Java (RPMs)"
+        options: "--releasever 7.2 --basearch x86_64"
+  - name: "Oracle Java for RHEL Server - Extended Update Support"
+    repos:
+      - name: "Red Hat Enterprise Linux 7 Server - Extended Update Support - Oracle Java (RPMs)"
+        options: "--releasever 7Server --basearch x86_64"
+      - name: "Red Hat Enterprise Linux 7 Server - Extended Update Support - Oracle Java (RPMs)"
+        options: "--releasever 7.1 --basearch x86_64"
+      - name: "Red Hat Enterprise Linux 7 Server - Extended Update Support - Oracle Java (RPMs)"
+        options: "--releasever 7.2 --basearch x86_64"
+
+# Define custom products and repositories
+sat_custom_products:
+  - name: "Custom-Product"
+    repos:
+      - name: "Custom-Repo-1"
+        options: "--publish-via-http=true"
+      - name: "Custom-Repo-2"
+        options: "--publish-via-http=true"
+      - name: "Custom-Repo-3"
+        options: "--publish-via-http=true"
+
+# Define third-party products and repositories
+sat_thirdparty_products:
+  - name: "EPEL"
+    repos:
+      - name: "EPEL-7_x86_64"
+        url: "http://mirrors.kernel.org/fedora-epel/7/x86_64/"
+        options: "--publish-via-http=true"
+  - name: "GitLab"
+    repos:
+      - name: "GitLab-7_x86_64"
+        url: "https://packages.gitlab.com/gitlab/gitlab-ee/el/7/x86_64/"
+        options: "--publish-via-http=true"
+  - name: "MySQL"
+    repos:
+      - name: "MySQL-Connectors-Community-7_x86_64"
+        url: "http://repo.mysql.com/yum/mysql-connectors-community/el/7/x86_64/"
+        options: "--publish-via-http=true"
+  - name: "PagerDuty"
+    repos:
+      - name: "PagerDuty-7_x86_64"
+        url: "http://packages.pagerduty.com/pdagent/rpm/"
+        options: "--publish-via-http=true"
+  - name: "Percona"
+    repos:
+      - name: "Percona-7_x86_64"
+        url: "http://repo.percona.com/release/7Server/RPMS/x86_64/"
+        options: "--publish-via-http=true"
+      - name: "Percona-7_noarch"
+        url: "http://repo.percona.com/release/7Server/RPMS/noarch/"
+        options: "--publish-via-http=true"
+  - name: "Zabbix"
+    repos:
+      - name: "Zabbix-24-7_x86_64"
+        url: "http://repo.zabbix.com/zabbix/2.4/rhel/7/x86_64/"
+        options: "--publish-via-http=true"
+      - name: "Zabbix-30-7_x86_64"
+        url: "http://repo.zabbix.com/zabbix/3.0/rhel/7/x86_64/"
+        options: "--publish-via-http=true"
+
+# Define Docker products and repositories
+sat_docker_products:
+  - name: "Red Hat Containers"
+    repos:
+      - name: "Red Hat Enterprise Linux"
+        url: "https://registry.access.redhat.com"
+        upstream: "rhel"
+        options: "--publish-via-http=true"
+
+# Define times to sync products with upstream repositories
+# Enter times as "HH:MM:SS"
+sat_sync_plans:
+  - name: "Red Hat Daily Sync"
+    interval: daily
+    synctime: "01:00:00"
+    products:
+      - "Oracle Java for RHEL Server"
+      - "Red Hat Enterprise Linux Server"
+      - "Red Hat Enterprise Linux Server - Extended Update Support"
+      - "Red Hat Software Collections for RHEL Server"
+      - "Red Hat Containers"
+  - name: "Third Party Daily Sync"
+    interval: daily
+    synctime: "11:00:00"
+    products:
+      - "EPEL"
+      - "GitLab"
+      - "MySQL"
+      - "PagerDuty"
+      - "Percona"
+      - "Zabbix"

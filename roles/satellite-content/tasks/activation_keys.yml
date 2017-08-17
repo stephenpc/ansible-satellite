@@ -1,0 +1,77 @@
+---
+# Create activation keys
+
+  # Set up initial activation key(s)
+  - name: Creating activation key(s)
+    command: >
+      /bin/hammer activation-key create
+      --organization "{{ initial_org }}"
+      --name "{{ item.name }}"
+      --content-view "{{ item.content_view }}"
+      --lifecycle-environment "{{ item.lifecycle_env }}"
+    register: create_activation_keys
+    with_items: sat_activation_keys
+    failed_when: >
+      create_activation_keys.rc != 0
+      and create_activation_keys.rc != 65
+    changed_when: >
+      create_activation_keys.rc == 0
+
+  # Set activation key release versions
+  - name: Updating activation key release versions
+    command: >
+      /bin/hammer activation-key update
+      --organization "{{ initial_org }}"
+      --name "{{ item.name }}"
+      --release-version "{{ item.releasever }}"
+    register: update_activation_keys_rv
+    with_items: sat_activation_keys
+    failed_when: >
+      update_activation_keys_rv.rc != 0
+      and update_activation_keys_rv.rc != 65
+    changed_when: >
+      update_activation_keys_rv.rc == 0
+    ignore_errors: yes
+
+  # Figure out what subscriptions are available to this Satellite server
+  - name: Obtaining All Subscription IDs
+    shell: >
+      /bin/hammer subscription list
+      --organization "{{ initial_org }}" | awk -F"|" '{ print $8 }' | column -t | egrep -vi "(--|ID)"
+    register: all_subscription_ids
+    changed_when: no
+
+  # Add subscriptions to each activation key so that we can adjust content on a key basis
+  - name: Add subscription to activation key(s)
+    command: >
+      /bin/hammer activation-key add-subscription
+      --organization "{{ initial_org }}"
+      --name "{{ item[0].name }}"
+      --subscription-id "{{ item[1] }}"
+    register: add_activation_key_sub
+    with_nested:
+      - "{{ sat_activation_keys }}"
+      - "{{ all_subscription_ids.stdout_lines }}"
+    failed_when: >
+      add_activation_key_sub.rc != 0
+      and add_activation_key_sub.rc != 65
+    changed_when: >
+      add_activation_key_sub.rc == 0
+
+  # Override default values for each subscription specified
+  - name: Override content defaults to enable needed repos for activation key(s)
+    command: >
+      /bin/hammer activation-key content-override
+      --organization "{{ initial_org }}"
+      --name "{{ item.0.name }}"
+      --content-label "{{ item.1 }}"
+      --value 1
+    register: ak_content_override
+    with_subelements:
+      - sat_activation_keys
+      - repo_overrides
+    failed_when: >
+      ak_content_override.rc != 0
+      and ak_content_override.rc != 65
+    changed_when: >
+      ak_content_override.rc == 0

@@ -1,0 +1,12 @@
+---
+# ansible-satellite | Satellite 6.x Orchestration
+
+- hosts: satellite6-server-prod
+  become: yes
+  vars_files:
+    - group_vars/all.yml
+    - group_vars/secrets.yml
+  gather_facts: no
+  roles:
+    # satellite-selfsubscribe | Subscribe the server to itself
+    - role: satellite-selfsubscribe

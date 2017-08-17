@@ -1,0 +1,21 @@
+---
+# Add Red Hat repositories
+
+  # Enable repos from sat_products
+  - name: Enable repositories
+    command: >
+      /bin/hammer repository-set enable
+      --organization "{{ initial_org }}"
+      --product "{{ item.0.name }}"
+      --name "{{ item.1.name }}"
+      {{ item.1.options }}
+    register: reposet_enablement
+    with_subelements:
+      - sat_products
+      - repos
+    failed_when: >
+      reposet_enablement.rc != 0
+      and reposet_enablement.rc != 65
+    changed_when: >
+      reposet_enablement.rc == 0
+    ignore_errors: yes

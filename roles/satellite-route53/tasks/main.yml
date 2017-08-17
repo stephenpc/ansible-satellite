@@ -1,0 +1,22 @@
+---
+# Register Satellite server in Route53 DNS
+
+  - name: Register system in Amazon Route53 DNS
+    become: no
+    local_action:
+      module: route53
+      command: create
+      overwrite: yes
+      zone: "{{ sat_domain }}."
+      record: "{{ sat_hostname }}.{{ sat_domain }}."
+      type: A
+      ttl: 300
+      value: "{{ ansible_default_ipv4.address }}"
+      private_zone: true
+    ignore_errors: yes
+
+  - name: IP discovery information
+    debug:
+      msg: "Ansible discovered the IP fact as {{ ansible_default_ipv4.address }}."
+    changed_when: no
+    ignore_errors: yes

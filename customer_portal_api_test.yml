@@ -1,0 +1,103 @@
+---
+# Test interaction with the Red Hat Customer Portal, Subscription Management
+# via the Candlepin API
+
+- hosts: localhost
+  connection: local
+  become: no
+  gather_facts: no
+
+  vars_prompt:
+    - name: "rhsm_host"
+      prompt: "Enter the full-qualified hostname of Red Hat Subscription Management. (Required)"
+      default: "subscription.rhn.redhat.com"
+      private: no
+    - name: "rhn_user"
+      prompt: "Enter your username for the Red Hat Customer Portal. (Required)"
+      private: no
+    - name: "rhn_pass"
+      prompt: "Enter your password for the Red Hat Customer Portal. (Required)"
+      private: yes
+
+  tasks:
+    - name: Get Candlepin Account number
+      uri:
+        body_format: json
+        method: GET
+        user: "{{ rhn_user }}"
+        password: "{{ rhn_pass }}"
+        status_code: [ 200, 201 ]
+        url: "https://{{ rhsm_host }}/subscription/users/{{ rhn_user }}/owners/"
+        validate_certs: no
+        force_basic_auth: yes
+      register: rhsm_candlepin_number
+
+    - debug:
+        var: rhsm_candlepin_number.json
+
+    - name: Get all consumers
+      uri:
+        body_format: json
+        method: GET
+        user: "{{ rhn_user }}"
+        password: "{{ rhn_pass }}"
+        status_code: [ 200, 201 ]
+        url: "https://{{ rhsm_host }}/subscription/owners/{{ item.key }}/consumers/"
+        validate_certs: no
+        force_basic_auth: yes
+      register: rhsm_candlepin_consumers
+      with_items: rhsm_candlepin_number.json
+
+    - debug:
+        var: rhsm_candlepin_consumers
+
+    - name: Get consumer manifest
+      uri:
+        method: GET
+        user: "{{ rhn_user }}"
+        password: "{{ rhn_pass }}"
+        status_code: [ 200, 201 ]
+        url: "https://{{ rhsm_host }}/subscription{{ item.href }}/export"
+        validate_certs: no
+        force_basic_auth: yes
+        creates: "{{ playbook_dir }}/manifest.zip"
+        dest: "{{ playbook_dir }}/manifest.zip"
+        return_content: no
+      with_items: rhsm_candlepin_consumers.results[0].json
+      register: rhsm_candlepin_consumer_manifest
+      ignore_errors: yes
+      failed_when: no
+
+    - debug:
+        var: rhsm_candlepin_consumer_manifest
+
+    - name: Get consumer entitlements
+      uri:
+        body_format: json
+        method: GET
+        user: "{{ rhn_user }}"
+        password: "{{ rhn_pass }}"
+        status_code: [ 200, 201 ]
+        url: "https://{{ rhsm_host }}/subscription/consumers/{{ item.uuid }}"
+        validate_certs: no
+        force_basic_auth: yes
+      with_items: rhsm_candlepin_consumers.results[0].json
+      register: rhsm_candlepin_consumer_entitlements
+
+    - debug:
+        var: rhsm_candlepin_consumer_entitlements
+
+    - name: Get distributor versions
+      uri:
+        body_format: json
+        method: GET
+        user: "{{ rhn_user }}"
+        password: "{{ rhn_pass }}"
+        status_code: [ 200, 201 ]
+        url: "https://{{ rhsm_host }}/subscription/distributor_versions"
+        validate_certs: no
+        force_basic_auth: yes
+      register: rhsm_candlepin_distrubutors
+
+    - debug:
+        var: rhsm_candlepin_distrubutors

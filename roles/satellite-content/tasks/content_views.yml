@@ -1,0 +1,199 @@
+---
+# Create content views
+
+  # Set up initial content views
+  - name: Creating content view(s)
+    command: >
+      /bin/hammer content-view create
+      --organization "{{ initial_org }}"
+      --name "{{ item.name }}"
+      --description "{{ item.description }}"
+    register: create_content_view
+    with_items: sat_content_views
+    failed_when: >
+      create_content_view.rc != 0
+      and create_content_view.rc != 65
+    changed_when: >
+      create_content_view.rc == 0
+
+  # Update content views that were already created
+  - name: Updating defined content view(s)
+    command: >
+      /bin/hammer content-view update
+      --organization "{{ initial_org }}"
+      --name "{{ item.item.name }}"
+      --description "{{ item.item.description }}"
+    register: update_content_view
+    with_items: create_content_view.results
+    failed_when: >
+      update_content_view.rc != 0
+    changed_when: >
+      update_content_view.rc == 0
+    when: >
+      item.rc == 65
+
+  # Assign repos to a content view
+  # ID numbers will be based on their order in satellite-setup/vars/main.yml
+  - name: Assign repositories to content views via repository ids
+    command: >
+      /bin/hammer content-view update
+      --organization "{{ initial_org }}"
+      --name "{{ item.name }}"
+      --repository-ids "{{ item.repo_ids | join(',') }}"
+    register: update_content_view
+    with_items: sat_content_views
+    failed_when: >
+      update_content_view.rc != 0
+      and update_content_view.rc != 65
+    changed_when: >
+      update_content_view.rc == 0
+
+  # Create content view package filters
+  - name: Creating content view package filter(s)
+    command: >
+      /bin/hammer content-view filter create
+      --organization "{{ initial_org }}"
+      --name "{{ item.name }}"
+      --content-view "{{ item.applytocv }}"
+      --inclusion "{{ item.inclusion | default(yes) }}"
+      --type "{{ item.type | default(rpm) }}"
+    register: create_content_package_filter
+    with_items: sat_content_package_filters
+    failed_when: >
+      create_content_package_filter.rc != 0
+      and create_content_package_filter.rc != 65
+    changed_when: >
+      create_content_package_filter.rc == 0
+    when: >
+      sat_content_package_filters is defined
+
+  # Add content filter rules by package
+  - name: Add content filter rules by package
+    command: >
+      /bin/hammer content-view filter rule create
+      --organization "{{ initial_org }}"
+      --name "{{ item.1 }}"
+      --content-view "{{ item.0.applytocv }}"
+      --content-view-filter "{{ item.0.name }}"
+    register: add_content_package_rule
+    with_subelements:
+      - sat_content_package_filters
+      - packages
+    failed_when: >
+      add_content_package_rule.rc != 0
+      and add_content_package_rule.rc != 65
+    changed_when: >
+      add_content_package_rule.rc == 0
+    when: >
+      sat_content_package_filters is defined
+
+  # Apply package filter to repositories
+  - name: Applying repository restrictions to package filters
+    command: >
+      /bin/hammer content-view filter update
+      --organization "{{ initial_org }}"
+      --name "{{ item.name }}"
+      --content-view "{{ item.applytocv }}"
+      --repository-ids "{{ item.repo_ids | join(',') }}"
+    register: apply_content_package_filter_repo
+    with_items: sat_content_package_filters
+    failed_when: >
+      apply_content_package_filter_repo.rc != 0
+      and apply_content_package_filter_repo.rc != 65
+    changed_when: >
+      apply_content_package_filter_repo.rc == 0
+    when: >
+      item.repo_ids is defined
+
+  # Create content date filters
+  - name: Creating content view date filter(s)
+    command: >
+      /bin/hammer content-view filter create
+      --organization "{{ initial_org }}"
+      --name "{{ item.name }}"
+      --content-view "{{ item.applytocv }}"
+      --inclusion "{{ item.inclusion | default(no) }}"
+      --type "{{ item.type | default(erratum) }}"
+    register: create_content_date_filter
+    with_items: sat_content_date_filters
+    failed_when: >
+      create_content_date_filter.rc != 0
+      and create_content_date_filter.rc != 65
+    changed_when: >
+      create_content_date_filter.rc == 0
+    when: >
+      sat_content_date_filters is defined
+
+  # Add content filter rules by date
+  - name: Add content filter rules by start date
+    command: >
+      /bin/hammer content-view filter rule create
+      --organization "{{ initial_org }}"
+      --content-view "{{ item.applytocv }}"
+      --content-view-filter "{{ item.name }}"
+      --start-date "{{ item.start_date }}"
+      --types "{{ item.errata_types | join(',') | default('security,enhancement,bugfix') }}"
+      --date-type "{{ item.date_type | default('issued') }}"
+    register: add_content_date_rule
+    with_items: sat_content_date_filters
+    failed_when: >
+      add_content_date_rule.rc != 0
+      and add_content_date_rule.rc != 65
+    changed_when: >
+      add_content_date_rule.rc == 0
+    when: >
+      sat_content_date_filters is defined
+
+  # Apply date filter to repositories
+  - name: Applying repository restrictions to date filters
+    command: >
+      /bin/hammer content-view filter update
+      --organization "{{ initial_org }}"
+      --name "{{ item.name }}"
+      --content-view "{{ item.applytocv }}"
+      --repository-ids "{{ item.repo_ids | join(',') }}"
+    register: apply_content_date_filter_repo
+    with_items: sat_content_date_filters
+    failed_when: >
+      apply_content_date_filter_repo.rc != 0
+      and apply_content_date_filter_repo.rc != 65
+    changed_when: >
+      apply_content_date_filter_repo.rc == 0
+    when: >
+      item.repo_ids is defined
+
+  # Publish the initial version of each view
+  - name: Publish content views to the Library environment
+    command: >
+      /bin/hammer content-view publish
+      --organization "{{ initial_org }}"
+      --name "{{ item.name }}"
+    register: publish_content_view
+    with_items: sat_content_views
+    failed_when: >
+      publish_content_view.rc != 0
+      and publish_content_view.rc != 65
+    changed_when: >
+      publish_content_view.rc == 0
+    ignore_errors: yes
+
+  # Promote initial content views beyond Library environment
+  - name: Promote initial content views from the Library to their respective environments
+    command: >
+      /bin/hammer content-view version promote
+      --organization "{{ initial_org }}"
+      --content-view "{{ item.0.name }}"
+      --to-lifecycle-environment "{{ item.1 }}"
+      --version "1.0"
+    register: promote_content_view
+    with_subelements:
+      - sat_content_views
+      - env
+    when: >
+      "{{ item.1 }}" != "Library"
+    failed_when: >
+      promote_content_view.rc != 0
+      and promote_content_view.rc != 65
+    changed_when: >
+      promote_content_view.rc == 0
+    ignore_errors: yes

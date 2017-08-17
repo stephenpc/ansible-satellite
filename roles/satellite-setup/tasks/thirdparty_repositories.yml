@@ -1,0 +1,36 @@
+---
+# Third-party repositories
+
+  # Create products
+  - name: Create third-party products
+    command: >
+      /bin/hammer product create
+      --organization "{{ initial_org }}"
+      --name "{{ item.name }}"
+    register: create_thirdparty_prod
+    with_items: sat_thirdparty_products
+    failed_when: >
+      create_thirdparty_prod.rc != 0
+      and create_thirdparty_prod.rc != 65
+    changed_when: >
+      create_thirdparty_prod.rc == 0
+
+  # Create yum repositories for the products
+  - name: Create third-party yum repositories
+    command: >
+      /bin/hammer repository create
+      --organization "{{ initial_org }}"
+      --product "{{ item.0.name }}"
+      --name "{{ item.1.name }}"
+      --url "{{ item.1.url }}"
+      --content-type "yum"
+      {{ item.1.options }}
+    register: create_thirdparty_repo
+    with_subelements:
+      - sat_thirdparty_products
+      - repos
+    failed_when: >
+      create_thirdparty_repo.rc != 0
+      and create_thirdparty_repo.rc != 65
+    changed_when: >
+      create_thirdparty_repo.rc == 0

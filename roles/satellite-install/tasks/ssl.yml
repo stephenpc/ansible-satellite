@@ -1,0 +1,29 @@
+---
+# Get SSL certificates into place for Satellite install
+
+- name: Copy pki credentials to server
+  copy:
+    src: "{{ item }}"
+    dest: "{{ custom_ssl.file_loc }}"
+    owner: root
+    group: root
+    mode: 0440
+  with_items:
+    - "{{ custom_ssl.pki.root }}"
+    - "{{ custom_ssl.pki.key }}"
+    - "{{ custom_ssl.pki.csr }}"
+    - "{{ custom_ssl.pki.cert }}"
+  when: >
+    custom_ssl.pki.root is defined
+    and custom_ssl.pki.key is defined
+    and custom_ssl.pki.csr is defined
+    and custom_ssl.pki.cert is defined
+
+- name: Decrypt private key
+  shell: "/bin/mv {{ custom_ssl.pki.key }} {{ custom_ssl.pki.key }}_encrypted; /bin/openssl aes-256-cbc -salt -a -d -in {{ custom_ssl.pki.key }}_encrypted -out {{ custom_ssl.pki.key }} -k {{ openssl_passphrase }}; /bin/chmod 440 {{ custom_ssl.pki.key }}"
+  args:
+    chdir: "{{ custom_ssl.file_loc }}"
+  when: >
+    custom_ssl.encrypted_key | default(no)
+    and openssl_passphrase is defined
+  no_log: yes

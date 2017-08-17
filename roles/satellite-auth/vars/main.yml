@@ -1,0 +1,77 @@
+---
+# satellite-auth vars
+
+# Authentication defaults
+sat_auth_global:
+  default_org_id: 1
+  default_loc_id: 2
+
+# Define additional users with role assignments
+sat_local_users:
+  - username: "viewer-user"
+    password: "viewonly"
+    email: "viewer-user@yourdomain.com"
+    first_name: "Viewer"
+    last_name: "User"
+    organizations:
+      - "Your Organization"
+    locations:
+      - "Your Location"
+    default_org_id: "{{ sat_auth_global.default_org_id }}"
+    default_loc_id: "{{ sat_auth_global.default_loc_id }}"
+    administrator: no
+    roles:
+      - "Viewer"
+
+# Define LDAP or AD authentication source
+sat_auth_source:
+  # Active Directory Server
+  - name: "Active_Directory"
+    encryption: yes
+    server: "ad-server.yourdomain.com"
+    port: 636
+    type: "active_directory"
+    bind_user: "DOM\\bind-user"
+    bind_pass: "BIND-PASSWORD"
+    base_dn: "dc=ad,dc=yourdomain,dc=com"
+    filter: "(objectCategory=person)"
+    group_base_dn: "dc=ad,dc=yourdomain,dc=com"
+    create_accounts: yes
+    group_sync: no
+    attribute_mappings:
+      login: "sAMAccountName"
+      fname: "givenName"
+      lname: "sn"
+      email: "mail"
+      photo: "thumbnailPhoto"
+    # # List certificates required to verify the certificate chain for the LDAP server
+    # certificates:
+    #   - issuing_ca.pem
+    #   - server.pem
+    #   - root_ca.pem
+
+# Group mappings for internal to external groups
+sat_ldap_group_maps:
+  - name: "Sat_Admins"
+    mapto: [ 'AD-ADMIN-GROUP' ]
+    admin: yes
+    roles:
+      - "Discovery Reader"
+      - "Discovery Manager"
+      - "Boot disk access"
+      - "Tasks Manager"
+      - "Tasks Reader"
+      - "Red Hat Access Logs"
+      - "Access Insights Viewer"
+      - "Access Insights Admin"
+      - "Manager"
+      - "Edit partition tables"
+      - "View hosts"
+      - "Edit hosts"
+      - "Viewer"
+      - "Site manager"
+  - name: "Sat_Viewers"
+    mapto: [ 'AD-READONLY-GROUP' ]
+    admin: no
+    roles:
+      - "Viewer"

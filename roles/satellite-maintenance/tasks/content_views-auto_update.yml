@@ -1,0 +1,236 @@
+---
+# Adjust content views to include content up to today's date and publish to
+# the library and lower environments
+
+# Get existing content views from Satellite server
+- name: Get existing content views
+  become: no
+  local_action:
+    module: uri
+    body_format: json
+    method: GET
+    user: admin
+    password: "{{ sat_admin_password }}"
+    status_code: [ 200, 201 ]
+    url: "https://{{ satellite_server }}/katello/api/v2/content_views?per_page=5000"
+    validate_certs: no
+    force_basic_auth: yes
+  register: sat_contentviews_get
+
+# Get content view filters
+- name: Get all content view filters
+  become: no
+  local_action:
+    module: uri
+    body_format: json
+    method: GET
+    user: admin
+    password: "{{ sat_admin_password }}"
+    status_code: [ 200, 201 ]
+    url: "https://{{ satellite_server }}/katello/api/v2/content_views/{{ item.id }}/filters"
+    validate_certs: no
+    force_basic_auth: yes
+  register: sat_contentviewfilters_get
+  with_items: sat_contentviews_get.json.results
+
+# Try to update existing view descriptions, except for the Default Organization view
+# which has an ID of 1
+- name: Update existing view information (non-composite)
+  command: >
+    /bin/hammer content-view update
+    --organization "{{ item.organization.name }}"
+    --name "{{ item.name }}"
+    --description "{{ item.name | replace('-cv','') }} view - excluding errata after {{ ansible_date_time.month}}.{{ ansible_date_time.day }}.{{ ansible_date_time.year }}"
+  register: sat_contentviews_update
+  with_items: sat_contentviews_get.json.results
+  when: >
+    item.composite is none
+    and item.id != 1
+  failed_when: >
+    sat_contentviews_update.rc != 0
+
+# Transform content view filters data
+- name: Set content view filters fact
+  set_fact:
+    sat_contentviewfilters_fact: "{{ lookup('template', 'content_view_filters.yml') | from_yaml }}"
+
+- name: Set content view package filters fact
+  set_fact:
+    content_view_pf: "{{ lookup('template', 'content_view_package_filters.yml') | from_yaml }}"
+
+# Drop all content view filters
+- name: Drop all content view filters
+  become: no
+  local_action:
+    module: uri
+    body_format: json
+    method: DELETE
+    user: admin
+    password: "{{ sat_admin_password }}"
+    status_code: [ 200, 201, 204 ]
+    url: "https://{{ satellite_server }}/katello/api/v2/content_views/{{ item.viewid }}/filters/{{ item.filterid }}"
+    validate_certs: no
+    force_basic_auth: yes
+  register: sat_contentviewfilters_delete
+  with_items: sat_contentviewfilters_fact
+  changed_when: >
+    "sat_contentviewfilters_delete.msg == 'All items completed'"
+
+# Create content view package filters
+- name: Creating content view package filter(s)
+  command: >
+    /bin/hammer content-view filter create
+    --organization "{{ initial_org }}"
+    --name "{{ item.name }}"
+    --content-view "{{ item.content_view_name }}"
+    --inclusion "{{ item.is_inclusion }}"
+    --type "{{ item.type }}"
+  register: create_content_package_filter
+  with_items: content_view_pf
+  failed_when: >
+    create_content_package_filter.rc != 0
+    and create_content_package_filter.rc != 65
+  changed_when: >
+    create_content_package_filter.rc == 0
+  when: >
+    content_view_pf is defined
+
+# Add content filter rules by package
+- name: Add content filter rules by package
+  command: >
+    /bin/hammer content-view filter rule create
+    --organization "{{ initial_org }}"
+    --name "{{ item.1.name }}"
+    --content-view "{{ item.0.content_view_name }}"
+    --content-view-filter "{{ item.0.name }}"
+  register: add_content_package_rule
+  with_subelements:
+    - content_view_pf | default([])
+    - rules
+  failed_when: >
+    add_content_package_rule.rc != 0
+    and add_content_package_rule.rc != 65
+  changed_when: >
+    add_content_package_rule.rc == 0
+  when: >
+    content_view_pf is defined
+
+# Apply package filter to repositories
+- name: Applying repository restrictions to package filters
+  command: >
+    /bin/hammer content-view filter update
+    --organization "{{ initial_org }}"
+    --name "{{ item.name }}"
+    --content-view "{{ item.content_view_name }}"
+    --repository-ids "{{ item.repositories | join(',') }}"
+  register: apply_content_package_filter_repo
+  with_items: content_view_pf
+  failed_when: >
+    apply_content_package_filter_repo.rc != 0
+    and apply_content_package_filter_repo.rc != 65
+  changed_when: >
+    apply_content_package_filter_repo.rc == 0
+  when: >
+    content_view_pf is defined
+
+# Create content date filters
+- name: Creating content view erratum filters using date exclusion
+  command: >
+    /bin/hammer content-view filter create
+    --organization "{{ initial_org }}"
+    --name "{{ item.name | replace('-cv','') }}-dated_to_{{ ansible_date_time.month }}{{ ansible_date_time.day }}{{ ansible_date_time.year }}"
+    --content-view "{{ item.name }}"
+    --inclusion "{{ sat_content_orchestration.date_filters.inclusion }}"
+    --type "{{ sat_content_orchestration.date_filters.type }}"
+  register: create_content_date_filter
+  with_items: sat_contentviews_get.json.results
+  failed_when: >
+    create_content_date_filter.rc != 0
+    and create_content_date_filter.rc != 65
+  changed_when: >
+    create_content_date_filter.rc == 0
+  when: >
+    sat_content_date_filters is defined
+    and item.id != 1
+
+# Add content filter rules by date
+- name: Exclude erratum updated after todays date
+  command: >
+    /bin/hammer content-view filter rule create
+    --organization "{{ initial_org }}"
+    --content-view "{{ item.name }}"
+    --content-view-filter "{{ item.name | replace('-cv','') }}-dated_to_{{ ansible_date_time.month }}{{ ansible_date_time.day }}{{ ansible_date_time.year }}"
+    --start-date "{{ sat_content_orchestration.date_filters.start_date }}"
+    --types "{{ sat_content_orchestration.date_filters.errata_types | join(',') }}"
+    --date-type "{{ sat_content_orchestration.date_filters.date_type }}"
+  register: add_content_date_rule
+  with_items: sat_contentviews_get.json.results
+  failed_when: >
+    add_content_date_rule.rc != 0
+    and add_content_date_rule.rc != 65
+  changed_when: >
+    add_content_date_rule.rc == 0
+  when: >
+    sat_content_date_filters is defined
+    and item.id != 1
+
+# Publish the updated version of views to the Library
+- name: Publish new version of content views to the Library environment
+  command: >
+    /bin/hammer content-view publish
+    --organization "{{ item.organization.name }}"
+    --name "{{ item.name }}"
+  register: publish_content_view
+  with_items: sat_contentviews_get.json.results
+  failed_when: >
+    publish_content_view.rc != 0
+    and publish_content_view.rc != 65
+  changed_when: >
+    publish_content_view.rc == 0
+  when: >
+    item.id != 1
+  ignore_errors: yes
+
+# Transform content view filters data
+- name: Set content view fact
+  set_fact:
+    sat_contentviews_fact: "{{ lookup('template', 'content_views.yml') | from_yaml }}"
+
+- name: Alert Satellite channel in Slack - Making content available to non-prod
+  slack:
+    token: "{{ slack_token }}"
+    msg: "`{{ sat_hostname }}` | _Making RPM packages and patches up to {{ ansible_date_time.month }}.{{ ansible_date_time.day }}.{{ ansible_date_time.year }} available to *NON-PROD* systems..._"
+    username: "{{ slack_user }}"
+    validate_certs: no
+  when: >
+    slack_pubpromo_notify | default(true)
+
+# Promote latest version of content views from the Library to non-production environments
+- name: Promote latest version of content views from the Library to non-production environments
+  command: >
+    /bin/hammer content-view version promote
+    --organization "{{ item.org }}"
+    --content-view "{{ item.cv_name}}"
+    --to-lifecycle-environment "{{ item.env }}"
+    --version "{{ item.next_version }}.0"
+  register: promote_content_view
+  with_items: sat_contentviews_fact
+  when: >
+    "{{ item.env }}" != "Library"
+    and not item.env|lower|search(".*_prod.*")
+  failed_when: >
+    promote_content_view.rc != 0
+    and promote_content_view.rc != 65
+  changed_when: >
+    promote_content_view.rc == 0
+
+- name: Alert Satellite channel in Slack - What was updated in non-prod
+  slack:
+    token: "{{ slack_token }}"
+    msg: "`{{ sat_hostname }}` | _Updated content in *{{ item.item.cv_name }}* is available to hosts subscribed in the *{{ item.item.env }}* environment. Software packages are current to {{ ansible_date_time.month }}.{{ ansible_date_time.day }}.{{ ansible_date_time.year }}._"
+    username: "{{ slack_user }}"
+    validate_certs: no
+  with_items: promote_content_view.results
+  when: >
+    slack_pubpromo_notify | default(true)
+    and item|changed

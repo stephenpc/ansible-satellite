@@ -1,0 +1,79 @@
+---
+# Subscribe the Satellite server to itself
+# Based on the following knowledge base article:
+# https://access.redhat.com/documentation/en-US/Red_Hat_Satellite/6.1/html/Installation_Guide/chap-Red_Hat_Satellite-Installation_Guide-Configuring_a_Self_Registered_Satellite.html
+
+# Check registration status of the system
+- name: Remove subscription directly to RHSM
+  command: >
+    /sbin/subscription-manager remove --all
+  ignore_errors: yes
+
+# Unregister the server
+- name: Deregister the system and purge subscription data
+  shell: >
+    /sbin/subscription-manager unregister && /sbin/subscription-manager clean
+  ignore_errors: yes
+  failed_when: no
+
+# Wait for user to update manifest
+- name: Wait 5 minutes for the user to update the manifest
+  pause:
+    minutes: 5
+    prompt: "Go add the Satellite server subscription to the Satellite manifest at https://access.redhat.com/management/distributors/"
+
+# Update the manifest from the customer portal
+- name: "Refresh the manifest from the Red Hat Portal"
+  command: >
+    /bin/hammer subscription refresh-manifest
+    --organization "{{ initial_org }}"
+
+# Remove Satellite certificates
+- name: Uninstall certificates package if installed
+  yum:
+    state: removed
+    name: "*katello-ca-consumer-satellite*"
+  ignore_errors: yes
+
+# Install the required certificates from the Satellite server
+- name: Install certificates from Satellite server
+  yum:
+    state: present
+    name: "/var/www/html/pub/katello-ca-consumer-latest.noarch.rpm"
+    disable_gpg_check: yes
+  ignore_errors: yes
+
+# Bring in Satellite server content and make it available
+- include: self_content.yml
+
+# Check registration status of the system
+- name: Subscribe the Satellite Server to itself
+  command: >
+    /sbin/subscription-manager register --org "{{ initial_org | replace(' ','_') }}" --activationkey "{{ self_subscribe_key }}"
+  ignore_errors: yes
+
+# Remove automatically attached subscriptions
+- name: Remove any subscriptions that were automatically attached
+  shell: >
+    /sbin/subscription-manager remove --all
+  ignore_errors: yes
+
+# Figure out which pool to atttach based on Satellite product SKU
+- name: Discover Satellite subscription pool based on SKU
+  shell: >
+    /bin/subscription-manager list --available | grep "{{ satellite_product_sku }}" -A3 | grep -i pool | awk '{ print $3 }'
+  register: sat_selfsubscribe_pool
+  ignore_errors: yes
+
+# Attach Satellite server subscription pool
+- name: Attach Satellite subscription pool
+  command: >
+    /bin/subscription-manager attach --pool "{{ sat_selfsubscribe_pool.stdout }}"
+  ignore_errors: yes
+
+# Install Katello so that Satellite can manage itself
+- name: Install Katello agent
+  yum:
+    state: installed
+    name: katello-agent
+  ignore_errors: yes

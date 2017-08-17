@@ -1,0 +1,16 @@
+---
+# Tighten up Satellite 6 server security
+
+# Disable weak encryption
+- name: Disable weak Apache SSL encryption
+  lineinfile:
+    dest: "{{ apache_confd }}/{{ item }}"
+    state: present
+    backup: yes
+    regexp: '(.*)SSLProtocol(.*)'
+    line: '  SSLProtocol\tall -SSLv2 -SSLv3'
+  with_items:
+    - 'ssl.conf'
+    - '25-puppet.conf'
+  notify:
+    - Restart Apache

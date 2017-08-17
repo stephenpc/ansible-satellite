@@ -1,0 +1,23 @@
+---
+# Install packages recommended for Satellite
+- name: Install recommended packages
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "sos"
+
+# Install packages to hopefully combat katello-installer killing subscription-manager
+- name: Ensure subscription-manager tool is installed
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "passwd"
+    - "python-rhsm"
+    - "usermode"
+    - "python-dmidecode"
+    - "python-ethtool"
+    - "pygobject2"
+    - "libnl"
+    - "subscription-manager"

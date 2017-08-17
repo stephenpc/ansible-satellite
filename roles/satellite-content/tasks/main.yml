@@ -1,0 +1,44 @@
+---
+# Basic Satellite content promotion and availability
+
+  # Make sure needed data is passed in
+  - name: Check role requirements
+    fail:
+      msg: "You must pass an organization and a location to this role. Please see README.md for more detail."
+    when: >
+      initial_org is not defined
+      or initial_loc is not defined
+
+  # Wait for primary sync to finish if wait_on_sync is true/yes
+  - name: Wait until sync completes or until the speficied interval in minutes
+    shell: >
+      /bin/hammer task list --search Sync | grep -v lock
+    register: hammer_sync_progress
+    until: hammer_sync_progress.stdout.find("running | pending") == -1
+    retries: "{{ wait_on_sync_minutes }}"
+    delay: 60
+    changed_when: no
+    ignore_errors: yes
+    when: >
+      wait_on_sync_minutes is defined
+      and wait_on_sync_minutes > 0
+
+  # Grab and upload content from S3 bucket
+  - include: s3.yml
+    when: >
+      sat_s3bucket is defined
+
+  # Set up base lifecycle environment
+  - include: lifecycle.yml
+    when: >
+      sat_lifecycle is defined
+
+  # Set up initial content views
+  - include: content_views.yml
+    when: >
+      sat_content_views is defined
+
+  # Set up activation keys
+  - include: activation_keys.yml
+    when: >
+      sat_activation_keys is defined

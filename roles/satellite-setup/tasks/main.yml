@@ -1,0 +1,159 @@
+---
+# Satellite basic configuration
+
+  # Make sure needed data is passed in
+  - name: Checking for setup requirements
+    fail:
+      msg: "You must pass an organization, location, username, and manifest to this role. Please see README.md for more detail."
+    when: >
+      initial_org is not defined
+      or initial_loc is not defined
+      or initial_user is not defined
+      or sat_manifest is not defined
+
+  # Create a directory to contain hammer cli configuration
+  - name: Create Hammer configuration directory
+    command: >
+      /bin/mkdir -p /root/.hammer
+      creates: /root/.hammer
+
+  # Insert the configuration into the directory, this should be templatized in the future
+  - name: Create Hammer configuration file
+    template:
+      src: cli_config.yml.j2
+      dest: /root/.hammer/cli_config.yml
+      owner: root
+      group: root
+      mode: 0400
+
+  # Make sure Hammer can talk to Satellite on the system
+  - name: Check for Hammer connectivity to Satellite
+    shell: >
+      /bin/hammer ping | /bin/egrep -i 'status.*ok'
+    changed_when: no
+
+  - name: Create an initial organization
+    command: >
+      /bin/hammer organization create
+      --name "{{ initial_org }}"
+      --label "{{ initial_org }}"
+    register: create_org
+    failed_when: >
+      create_org.rc != 0
+      and create_org.rc != 65
+    changed_when: >
+      create_org.rc == 0
+
+  - name: Add a user to the organization
+    command: >
+      /bin/hammer organization add-user
+      --name "{{ initial_org }}"
+      --user "{{ initial_user }}"
+    register: org_adduser
+    failed_when: >
+      org_adduser.rc != 0
+      and org_adduser.rc != 65
+    changed_when: >
+      org_adduser.rc == 0
+
+  - name: Add a new location
+    command: >
+      /bin/hammer location create
+      --name "{{ initial_loc }}"
+    register: location_create
+    failed_when: >
+      location_create.rc != 0
+      and location_create.rc != 65
+    changed_when: >
+      location_create.rc == 0
+
+  - name: Add a user to the location
+    command: >
+      /bin/hammer location add-user
+      --name "{{ initial_loc }}"
+      --user "{{ initial_user }}"
+    register: loc_adduser
+    failed_when: >
+      loc_adduser.rc != 0
+      and loc_adduser.rc != 65
+    changed_when: >
+      loc_adduser.rc == 0
+
+  - name: Add an organization to the location
+    command: >
+      /bin/hammer location add-organization
+      --name "{{ initial_loc }}"
+      --organization "{{ initial_org }}"
+    register: loc_addorg
+    failed_when: >
+      loc_addorg.rc != 0
+      and loc_addorg.rc != 65
+    changed_when: >
+      loc_adduser.rc == 0
+
+  # This manifest originates at https://access.redhat.com/management/distributors?type=satellite
+  # Place the manifest in the files folder of this role, and declare sat_manifest with the filename
+  - name: Copy Satellite manifest to server
+    copy:
+      src: "{{ sat_manifest }}"
+      dest: "{{ ansible_user_dir }}/{{ sat_manifest }}"
+      owner: root
+      group: root
+      mode: 0444
+
+  # Upload the checked in manifest to the Satellite server
+  - name: Upload manifest to Satellite
+    command: >
+      /bin/hammer subscription upload
+      --file "{{ ansible_user_dir }}/{{ sat_manifest }}"
+      --organization "{{ initial_org }}"
+    register: manifest_upload
+    failed_when: >
+      manifest_upload.rc != 0
+
+  # Update the manifest from the customer portal
+  - name: "Refresh the manifest with the latest copy from the Red Hat Portal"
+    command: >
+      /bin/hammer subscription refresh-manifest
+      --organization "{{ initial_org }}"
+
+  - name: Grab list of repositories available to this Satellite server
+    command: >
+      /bin/hammer product list
+      --organization "{{ initial_org }}"
+    changed_when: no
+    register: hammer_product_list
+
+  - name: Repository list
+    debug:
+      msg: "{{ hammer_product_list.stdout }}"
+
+  # Enable Red Hat repositories
+  - include: redhat_repositories.yml
+    when: >
+      sat_products is defined
+
+  # Set up custom repositories
+  - include: custom_repositories.yml
+    when: >
+      sat_custom_products is defined
+
+  # Set up third-party repositories
+  - include: thirdparty_repositories.yml
+    when: >
+      sat_thirdparty_products is defined
+
+  # Enable default Docker registry
+  - include: docker_repositories.yml
+    when: >
+      sat_docker_products is defined
+
+  # Initial Red Hat content sync
+  - include: initial_sync.yml
+    when: >
+      sat_products is defined
+
+  # Set up a sync plan
+  - include: sync_plans.yml
+    when: >
+      sat_sync_plans is defined

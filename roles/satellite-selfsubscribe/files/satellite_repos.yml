@@ -1,0 +1,5 @@
+{%- set repositories = [] -%}
+{%- for satrepo in satellite_repository_id.stdout_lines-%}
+      {%- if repositories.append([ satrepo | default(0) ]) -%}{%- endif -%}
+{%- endfor -%}
+{{ repositories }}

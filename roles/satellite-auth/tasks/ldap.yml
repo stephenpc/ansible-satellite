@@ -1,0 +1,109 @@
+---
+# Satellite LDAP authentication configuration
+
+# Copy Certificates to verify SSL certificate chain if needed
+- name: Copy certificates to server if using LDAPS
+  copy:
+    src: "{{ item.1 }}"
+    dest: "/etc/pki/ca-trust/source/anchors"
+    owner: root
+    group: root
+    mode: 0440
+  register: copy_certificates
+  with_subelements:
+    - sat_auth_source
+    - certificates | default([])
+  when: >
+    {{ item.0.encryption | default(no) }}
+    and ({{ item.1 | length }} > 0)
+  notify: Update CA trusts
+  no_log: yes
+
+# Add copied certificates to server CA trust
+- name: Update CA trusts
+  command: >
+    /bin/update-ca-trust extract
+  when: >
+    copy_certificates|changed
+
+# Restart Apache
+- name: Restart Apache so that Foreman will reload certificates
+  service:
+    name: httpd
+    state: restarted
+  when: >
+    copy_certificates|changed
+
+# Create Active Directory as a source for authentication
+- name: Create authentication source
+  command: >
+    /bin/hammer auth-source ldap create
+    --account "{{ item.bind_user | default('') }}"
+    --account-password "{{ item.bind_pass | default('') }}"
+    --attr-firstname "{{ item.attribute_mappings.fname | default('givenName') }}"
+    --attr-lastname "{{ item.attribute_mappings.lname | default('sn') }}"
+    --attr-login "{{ item.attribute_mappings.login | default('sAMAccountName')}}"
+    --attr-mail "{{ item.attribute_mappings.email | default('mail') }}"
+    --attr-photo "{{ item.attribute_mappings.photo | default('thumbnailPhoto') }}"
+    --base-dn "{{ item.base_dn }}"
+    --groups-base "{{ item.group_base_dn }}"
+    --host "{{ item.server }}"
+    --ldap-filter "{{ item.filter | default('') }}"
+    --name "{{ item.name }}"
+    --onthefly-register "{{ item.create_accounts | default(no) }}"
+    --port "{{ item.port | default(389) }}"
+    --server-type "{{ item.type | default('active_directory') }}"
+    --tls "{{ item.encryption | default(no) }}"
+    --usergroup-sync "{{ item.group_sync | default(yes) }}"
+  register: create_auth_source
+  with_items: sat_auth_source
+  failed_when: >
+    create_auth_source.rc != 0
+    and create_auth_source.rc != 65
+  when: >
+    sat_auth_source is defined
+  no_log: yes
+
+# Grab LDAP auth source from API
+- name: Get LDAP auth source
+  become: no
+  local_action:
+    module: uri
+    body_format: json
+    method: GET
+    user: admin
+    password: "{{ sat_admin_password }}"
+    status_code: [ 200, 201 ]
+    url: "https://{{ satellite_server }}/api/v2/auth_source_ldaps/{{ item.name }}"
+    validate_certs: no
+    force_basic_auth: yes
+  register: sat_authsources_get
+  with_items: sat_auth_source
+  no_log: yes
+
+# Create user groups
+- name: Create user groups
+  command: >
+    /bin/hammer user-group create
+    --name "{{ item.name }}"
+    --roles "{{ item.roles | join(',') }}"
+  register: sat_usergroup_create
+  with_items: sat_ldap_group_maps
+  failed_when: >
+    sat_usergroup_create.rc != 0
+    and sat_usergroup_create.rc != 65
+
+# Map user groups to LDAP groups
+- name: Create external user group mappings
+  command: >
+    /bin/hammer user-group external create
+    --auth-source-id "{{ sat_authsources_get.results[0].json.id }}"
+    --user-group "{{ item.0.name }}"
+    --name "{{ item.1 }}"
+  register: sat_usergroup_mappings
+  with_subelements:
+    - sat_ldap_group_maps
+    - mapto
+  failed_when: >
+    sat_usergroup_mappings.rc != 0
+    and sat_usergroup_mappings.rc != 65
