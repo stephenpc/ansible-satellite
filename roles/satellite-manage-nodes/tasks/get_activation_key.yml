@@ -1,0 +1,19 @@
+---
+# tasks file for satellite-manage-nodes
+
+  # Get activation key
+  - name: ":::: Get {{ node }} activation key ::::"
+    command: >
+      /bin/hammer product create
+      --organization "{{ initial_org }}"
+      --name "{{ item.name }}"
+    register: create_addl_prod
+    with_items: sat_custom_products
+    failed_when: >
+      create_addl_prod.rc != 0
+      and create_addl_prod.rc != 65
+    changed_when: >
+      create_addl_prod.rc == 0
+
+
+  

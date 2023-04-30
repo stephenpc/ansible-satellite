@@ -13,7 +13,7 @@ sat_manifest: "manifest.zip"
 
 sat_domain: "yourdomain.com"
 sat_hostname: "satellite"
-satellite_server: "satellite.yourdomain.com"
+satellite_server: "{{ sat_hostname }}.{{ sat_domain }}"
 
 #slack_token: "SOME-SUPER-LONG-SLACK-TOKEN-HERE"
 #slack_user: "SLACK-USERNAME"

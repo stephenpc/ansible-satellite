@@ -1,0 +1,20 @@
+---
+# ansible-satellite | Upgrade
+
+- hosts: local
+  become: yes
+  ansible_become_pass: 
+  gather_facts: yes
+  tasks:
+
+  - set_facts:
+    path:
+    user:
+    remote_server: 
+    remote_path: 
+
+  - name: Execute rsync command 
+    ansible.builtin.shell:  
+      cmd: rsync -avzh {{ path }}/*  {{ user }}@{{ remote_server }}:{{ remote_path }}/
+
+    # rsync -avzh -e 'ssh -X' --rsync-path='SUDO_ASKPASS=/usr/libexec/openssh/ssh-askpass sudo -A rsync' /var/lib/pulp/* [user]@[satellite server v12]:/var/lib/pulp/

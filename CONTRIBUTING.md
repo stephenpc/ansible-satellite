@@ -1,6 +1,6 @@
 # Contributing to ansible-satellite
 
-Feel free to contribute to the source code. This set of Ansible plays was contibuted by **Stephen Clayton** _[stephenpc@gmail.com](mailto:stephenpc@gmail.com)_.
+Feel free to contribute to the source code.
 
 Contributors
 ---
@@ -8,3 +8,4 @@ Contributors
 - [stephenpc](https://github.com/stephenpc)
 - [defionscode](https://github.com/defionscode)
 - [stenwt](https://github.com/stenwt)
+- [psehgaft](https://github.com/psehgaft)
