@@ -14,7 +14,7 @@
         key: "{{ ansible_distribution_major_version }}"
 
     - name: Unregister host
-      redhat_subscription: 
+      subscription-manager: 
         state: absent
       ignore_errors: True
 
