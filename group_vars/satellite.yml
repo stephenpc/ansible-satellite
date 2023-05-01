@@ -1,8 +1,8 @@
 ---
 # ansible-satellite group vars
 
-initial_org: "Your Organization"
-initial_loc: "Your Location"
+initial_org: "Default Organization"
+initial_loc: "Default Location"
 initial_user: "admin"
 sat_admin_email: "some-admin-user@yourdomain.com"
 sat_admin_firstname: "Admin"
@@ -11,9 +11,10 @@ sat_admin_lastname: "User"
 # Place the file with this name in the roles/satellite-setup/files folder
 sat_manifest: "manifest.zip"
 
-sat_domain: "yourdomain.com"
+sat_domain: "twsfd.example.opentlc.com/"
 sat_hostname: "satellite"
 satellite_server: "{{ sat_hostname }}.{{ sat_domain }}"
+org_id: 1
 
 #slack_token: "SOME-SUPER-LONG-SLACK-TOKEN-HERE"
 #slack_user: "SLACK-USERNAME"
@@ -36,3 +37,5 @@ satellite_server: "{{ sat_hostname }}.{{ sat_domain }}"
 # Go through self-subscription process
 # self_subscribe_key: "satellite_key-ak"
 # satellite_product_sku: "SOME-RH-SKU"
+
+

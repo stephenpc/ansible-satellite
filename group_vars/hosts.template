@@ -10,7 +10,7 @@ satellite.example.com
 [puppet_ca]
 satellite.example.com
 
-[nodes]
+[satellite6-server-prod]
 node.example.com
 
 [6RedHatEnterpriseServer:vars]

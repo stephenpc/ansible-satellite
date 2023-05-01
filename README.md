@@ -46,14 +46,14 @@ _These scripts are written to aid in refreshing subscriptions on all the hosts, 
 ## Satellite Authentication (**satellite-auth**)
 _This role sets up the Satellite Server with authenticated local users, or ties it into a central LDAP server for authentication._
 
-Invoke the role in the following way. Please note the configuration values specified in [roles/satellite-auth/vars/main.yml](roles/satellite-auth/vars/main.yml), [all.yml](group_vars/all.yml) and [secrets.yml](group_vars/secrets.yml).
+Invoke the role in the following way. Please note the configuration values specified in [roles/satellite-auth/vars/main.yml](roles/satellite-auth/vars/main.yml), [satellite.yml](group_vars/satellite.yml) and [secrets.yml](group_vars/secrets.yml).
 
 ```yaml
 ---
 - hosts: satellite6-server-prod
   become: yes
   vars_files:
-    - group_vars/all.yml
+    - group_vars/satellite.yml
     - group_vars/secrets.yml
   gather_facts: yes
       # satellite-auth | Define users and assign them roles
@@ -63,10 +63,10 @@ Invoke the role in the following way. Please note the configuration values speci
       # ldap_refresh: yes
 ```
 
-# Ansible Satellite Transition
+## Ansible Satellite Transition
 This playbook will move nodes registered in one Satellite host to another. *It will not install satellite/katello server for you.* Use this after you have set up a new Satellite server and want to move all your existing nodes from one server to another.
 
-# Configure Playbook
+### Configure Playbook
 Copy the hosts.template file and fill it out with information for your infrastructure. Add systems to [nodes] for hosts you want tasks to run on.
 
 ```[satellite]
@@ -99,13 +99,13 @@ Enable the satellite settings create_new_host_when_facts_are_uploaded and create
 
 To run on all of your nodes (defined in hosts) make sure you update the activationkey variables (in hosts) and then use.
 
-`ansible-playbook -i hosts satellite-playbook.yaml`
+`ansible-playbook -i inventory satellite-playbook.yaml`
 
 Add `-k` (ssh) or `-K` (sudo) if you need password prompts.
 
 You can also run just the puppet registration tasks with
 
-`ansible-playbook -i hosts satellite-playbook.yaml --tags puppet`
+`ansible-playbook -i inventory satellite-playbook.yaml --tags puppet`
 
 After the tasks complete you should have new unmanaged hosts in satellite. Edit the host and add any configuration you need (host groups, network, puppet). Unfortunately, I could not find a way to automate those steps yet. Your best bet is probably [hammer](https://github.com/theforeman/hammer-cli).
 
@@ -115,14 +115,14 @@ Once the hosts have been moved you may need to reinstall the katello-agent. Do t
 ## Satellite Content (**satellite-content**)
 _This role creates lifecycle environments on the Satellite Server, creates content views and filters them, then sets up activation keys pointing to each, and a release version with wich to activate RHEL systems._
 
-Invoke the role in the following way. Please note the configuration values specified in [roles/satellite-content/vars/main.yml](roles/satellite-content/vars/main.yml), [all.yml](group_vars/all.yml) and [secrets.yml](group_vars/secrets.yml).
+Invoke the role in the following way. Please note the configuration values specified in [roles/satellite-content/vars/main.yml](roles/satellite-content/vars/main.yml), [satellite.yml](group_vars/satellite.yml) and [secrets.yml](group_vars/secrets.yml).
 
 ```yaml
 ---
 - hosts: satellite6-server-prod
   become: yes
   vars_files:
-    - group_vars/all.yml
+    - group_vars/satellite.yml
     - group_vars/secrets.yml
   gather_facts: yes
   roles:
@@ -132,14 +132,14 @@ Invoke the role in the following way. Please note the configuration values speci
 ## Satellite Installation (**satellite-install**)
 _This role installs Satellite to a RHEL host._
 
-Invoke the role in the following way. Please note the configuration values specified in [roles/satellite-install/vars/main.yml](roles/satellite-install/vars/main.yml), [all.yml](group_vars/all.yml) and [secrets.yml](group_vars/secrets.yml).
+Invoke the role in the following way. Please note the configuration values specified in [roles/satellite-install/vars/main.yml](roles/satellite-install/vars/main.yml), [satellite.yml](group_vars/satellite.yml) and [secrets.yml](group_vars/secrets.yml).
 
 ```yaml
 ---
 - hosts: satellite6-server-prod
   become: yes
   vars_files:
-    - group_vars/all.yml
+    - group_vars/satellite.yml
     - group_vars/secrets.yml
   gather_facts: yes
     # satellite-install | Install Satellite 6 to a host
@@ -150,7 +150,7 @@ Invoke the role in the following way. Please note the configuration values speci
 ## Satellite Maintenance Tasks (**satellite-maintenance**)
 _This role covers several items with regard to maintaining the security of the Satellite server, such as SSL configuration. It also provides orchestration of rpm content to the Satellite server, so that it can be made available to hosts on a regular basis. It leverages some variables from the **satellite-content** role as well._
 
-Invoke the role in the following way. Please note the configuration values specified in [satellite-maintenance/vars/main.yml](roles/satellite-maintenance/vars/main.yml), [satellite-content/vars/main.yml](roles/satellite-content/vars/main.yml), [all.yml](group_vars/all.yml) and [secrets.yml](group_vars/secrets.yml).
+Invoke the role in the following way. Please note the configuration values specified in [satellite-maintenance/vars/main.yml](roles/satellite-maintenance/vars/main.yml), [satellite-content/vars/main.yml](roles/satellite-content/vars/main.yml), [satellite.yml](group_vars/satellite.yml) and [secrets.yml](group_vars/secrets.yml).
 
 ```yaml
 ---
@@ -169,14 +169,14 @@ Invoke the role in the following way. Please note the configuration values speci
 ## Amazon Route53 DNS Registration (**satellite-route53**)
 _This role adds an entry into Amazon Route53 DNS for the Satellite server._
 
-Invoke the role in the following way. Please note the configuration values specified in  [all.yml](group_vars/all.yml).
+Invoke the role in the following way. Please note the configuration values specified in  [satellite.yml](group_vars/satellite.yml).
 
 ```yaml
 ---
 - hosts: satellite6-server-prod
   become: yes
   vars_files:
-    - group_vars/all.yml
+    - group_vars/satellite.yml
     - group_vars/secrets.yml
   gather_facts: yes
   roles:
@@ -188,14 +188,14 @@ Invoke the role in the following way. Please note the configuration values speci
 ## Satellite Self-Subscription (**satellite-selfsubscribe**)
 _This roles subscribes the Satellite server to itself. It pauses for a period to allow someone to update the Satellite server manifest at the **Red Hat Customer Portal > Subscription Management > [Subscription Management Applications](https://access.redhat.com/management/distributors?type=satellite) > Satellite**, and will then continue to set Satellite up to receive content filtered in the same way as other systems._
 
-Invoke the role in the following way. Please note the configuration values specified in [roles/satellite-selfsubscribe/vars/main.yml](roles/satellite-selfsubscribe/vars/main.yml),  [all.yml](group_vars/all.yml) and [secrets.yml](group_vars/secrets.yml).
+Invoke the role in the following way. Please note the configuration values specified in [roles/satellite-selfsubscribe/vars/main.yml](roles/satellite-selfsubscribe/vars/main.yml),  [satellite.yml](group_vars/satellite.yml) and [secrets.yml](group_vars/secrets.yml).
 
 ```yaml
 ---
 - hosts: satellite6-server-prod
   become: yes
   vars_files:
-    - group_vars/all.yml
+    - group_vars/satellite.yml
     - group_vars/secrets.yml
   gather_facts: yes
   roles:
@@ -214,14 +214,14 @@ Note: A manifest can been created and included as part of this playbook. It can 
 ## Satellite Setup (**satellite-setup**)
 _This role ties the Satellite server to Red Hat using the manifest mentioned above, activates products, repositories, and also brings in Docker images from the Red Hat Registry, along with 3rd party and custom repositories for your own generated RPM content._
 
-Invoke the role in the following way. Please note the configuration values specified in [roles/satellite-setup/vars/main.yml](roles/satellite-setup/vars/main.yml), [all.yml](group_vars/all.yml) and [secrets.yml](group_vars/secrets.yml)
+Invoke the role in the following way. Please note the configuration values specified in [roles/satellite-setup/vars/main.yml](roles/satellite-setup/vars/main.yml), [satellite.yml](group_vars/satellite.yml) and [secrets.yml](group_vars/secrets.yml)
 
 ```yaml
 ---
 - hosts: satellite6-server-prod
   become: yes
   vars_files:
-    - group_vars/all.yml
+    - group_vars/satellite.yml
     - group_vars/secrets.yml
   gather_facts: yes
   roles:
@@ -231,7 +231,7 @@ Invoke the role in the following way. Please note the configuration values speci
 ## Satellite In-Place Upgrade (**satellite-upgrade**)
 _This role performs an in-place upgrade of Satellite 6.1 to the current 6.1.x release._
 
-Invoke the role in the following way. Please note the configuration values specified in  [all.yml](group_vars/all.yml).
+Invoke the role in the following way. Please note the configuration values specified in  [satellite.yml](group_vars/satellite.yml).
 
 ```yaml
 ---
