@@ -13,26 +13,8 @@ student1-sat.twsfd.example.opentlc.com
 [satellite6-server-prod]
 student1.twsfd.example.opentlc.com
 
-[6RedHatEnterpriseServer:vars]
-activationkey='server,6epel'
+[RedHat-8.6]
+activationkey=RHEL7_Prod
 
-[6RedHatEnterpriseWorkstation:vars]
-activationkey='workstation,6epel'
-
-[7RedHatEnterpriseServer:vars]
-activationkey='server,7epel'
-
-[7RedHatEnterpriseWorkstation:vars]
-activationkey='workstation,7epel'
-
-[8RedHatEnterpriseServer:vars]
-activationkey='server,8epel'
-
-[8RedHatEnterpriseWorkstation:vars]
-activationkey='workstation,8epel'
-
-[9RedHatEnterpriseServer:vars]
-activationkey='server,9epel'
-
-[9RedHatEnterpriseWorkstation:vars]
-activationkey='workstation,9epel'
+[RedHat-7:vars]
+activationkey=''

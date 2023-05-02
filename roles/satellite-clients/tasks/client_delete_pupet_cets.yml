@@ -1,0 +1,14 @@
+---
+# tasks file for satellite-clients
+
+- name: Remove puppet certs
+  file: path=/var/lib/puppet/ssl
+    state=absent
+  tags: puppet
+
+# Clean the old cert just in case
+- name: clean old cert on puppet ca
+  shell: /usr/bin/puppet cert clean {{ ansible_fqdn }}hromerot
+  delegate_to: "{{ groups['puppet_ca'][0] }}"
+  ignore_errors: True
+  tags: puppet

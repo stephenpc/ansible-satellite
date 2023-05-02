@@ -1,0 +1,14 @@
+---
+# Create activation keys
+
+  # Get all activation Keys
+- name: Install new satellite certs
+  shell:
+    cmd: 'hammer activation-key list --organization {{ initial_org }}'
+  register: hosts_keys 
+
+- set_fact:
+    activation_keys_list: activation_keys.stdout
+
+
+    
