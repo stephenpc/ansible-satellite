@@ -11,10 +11,13 @@
   tasks:
     # create dynamic groups to define variables
     - group_by: 
-        key: "{{ ansible_distribution_major_version }}"
+        key: "{{ ansible_distribution }}-{{ ansible_distribution_version | truncate(1, True, '') }}"
+
+    - debug: 
+        msg: "{{ ansible_distribution }}-{{ ansible_distribution_version | truncate(1, True, '') }}"
 
     - name: Unregister host
-      subscription-manager: 
+      redhat_subscription: 
         state: absent
       ignore_errors: True
 
@@ -30,7 +33,7 @@
       shell: "/usr/bin/yum localinstall -e 0 -y http://{{ groups['satellite'][0] }}/pub/katello-ca-consumer-latest.noarch.rpm"
       
     - name: Subscribe to Satellite
-      shell: "/usr/bin/subscription-manager register --org {{ org_id }} --activationkey={{ activationkey }}"
+      shell: "/usr/bin/subscription-manager register --org={{ org }} --activationkey={{ activationkey }}"
       register: subscription_result
       ignore_errors: True
 

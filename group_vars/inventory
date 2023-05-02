@@ -11,7 +11,7 @@ student1-sat.twsfd.example.opentlc.com
 # satellite.example.com
 
 [satellite6-server-prod]
-student1-sat.twsfd.example.opentlc.com ansible_connection=ssh ansible_ssh_user=student ansible_ssh_pass=lvynx8un
+student1.twsfd.example.opentlc.com
 
 [6RedHatEnterpriseServer:vars]
 activationkey='server,6epel'
