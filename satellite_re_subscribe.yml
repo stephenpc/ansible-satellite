@@ -1,15 +1,5 @@
 ---
 # ansible-satellite | Satellite 6.x Orchestration
-#- hosts: satellite
-#  vars_files:
-#    - group_vars/satellite.yml
-#    - group_vars/secrets.yml
-#  gather_facts: yes
-
-#  tasks:
-#    - name: ":::: Get list of all activation keys ::::"
-#      import_tasks: ./roles/satellite-content/tasks/get_activation_keys.yml
-
 - hosts: satellite6-server-prod
   become: yes
   vars_files:
@@ -24,6 +14,37 @@
 
     - set_fact: 
         ak: "{{ ansible_distribution }}-{{ ansible_distribution_version | truncate(1, True, '') }}"
+
+- hosts: satellite
+  vars_files:
+    - group_vars/satellite.yml
+    - group_vars/secrets.yml
+  gather_facts: yes
+
+  tasks:
+    - name: ":::: Get list of all activation keys ::::"
+      import_tasks: ./roles/satellite-content/tasks/get_activation_keys.yml
+
+    - name: ":::: Get Host and Key subscriptions ::::"
+      import_tasks:
+        - ./roles/satellite-content/tasks/get_activation_keys.yml
+        - ./roles/satellite-content/tasks/get_nodes_for_key.yml
+      vars:
+        activationkey: "{{ groups[ak] }}"
+    
+    - name: "Show lists of activation keys and nodes"
+      msg:
+       - "Activation keys list: {{ activation_keys_list }}"
+       - "Nodes list: {{ahost_for_key_list }}"
+
+- hosts: satellite6-server-prod
+  become: yes
+  vars_files:
+    - group_vars/satellite.yml
+    - group_vars/secrets.yml
+  gather_facts: yes
+  
+  tasks:
 
     - name: ":::: Unregister host ::::"
       import_tasks: ./roles/satellite-clients/tasks/client_unsubscribe.yml
