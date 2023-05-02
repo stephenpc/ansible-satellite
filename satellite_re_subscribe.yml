@@ -26,16 +26,15 @@
       import_tasks: ./roles/satellite-content/tasks/get_activation_keys.yml
 
     - name: ":::: Get Host and Key subscriptions ::::"
-      import_tasks:
-        - ./roles/satellite-content/tasks/get_activation_keys.yml
-        - ./roles/satellite-content/tasks/get_nodes_for_key.yml
+      import_tasks: ./roles/satellite-content/tasks/get_nodes_for_key.yml
       vars:
         activationkey: "{{ groups[ak] }}"
     
     - name: "Show lists of activation keys and nodes"
-      msg:
-       - "Activation keys list: {{ activation_keys_list }}"
-       - "Nodes list: {{ahost_for_key_list }}"
+      ansible.builtin.debug:
+       msg: 
+         - "Activation keys list: {{ activation_keys_list }}"
+         - "Nodes list: {{ahost_for_key_list }}"
 
 - hosts: satellite6-server-prod
   become: yes

@@ -8,6 +8,6 @@
   register: host_for_key 
 
 - set_fact:
-    ahost_for_key_list: host_for_key.stdout
+    host_for_key_list: host_for_key.stdout
 
     

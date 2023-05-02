@@ -7,7 +7,7 @@
   gather_facts: yes
   tasks:
 
-  - set_facts:
+  - set_fact:
     path:
     user:
     remote_server: 
