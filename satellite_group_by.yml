@@ -1,0 +1,19 @@
+---
+# ansible-satellite | Satellite 6.x Orchestration
+
+- hosts: satellite6-server-prod
+  become: yes
+  vars_files:
+    - group_vars/satellite.yml
+    - group_vars/secrets.yml
+  gather_facts: yes
+  
+  tasks:
+    # create dynamic groups to define variables
+    - group_by: 
+        key: "{{ ansible_distribution }}-{{ ansible_distribution_version | truncate(1, True, '') }}"
+
+    - debug: 
+        msg: "{{ ansible_distribution }}-{{ ansible_distribution_version | truncate(1, True, '') }}"
+
+    
