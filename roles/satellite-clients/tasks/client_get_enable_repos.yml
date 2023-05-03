@@ -1,0 +1,7 @@
+---
+# tasks file for satellite-clients
+
+- name: Clean old subscription-manager data
+  shell: 
+    cmd: subscription-manager repos --list-enabled
+
