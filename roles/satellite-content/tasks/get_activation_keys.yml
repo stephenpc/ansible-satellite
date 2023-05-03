@@ -12,7 +12,11 @@
 
 - set_fact:
     Number_of_keys: "{{ activation_keys_list|length }}"
-    activation_keys_list_clean: "{{ activation_keys_list|ansible.utils.remove_keys(matching_parameter= '(s|season)' }}"
+    activation_keys_list_clean: "{{ activation_keys_list|ansible.utils.remove_keys(regex_search('s|name')) }}"
+
+- set_fact:
+    Number_of_keys: "{{ activation_keys_list|length }}"
+    activation_keys_list: "{{ activation_keys_list_clean|ansible.utils.remove_keys(regex_search('s|name')) }}"
 
 - debug:
     msg: 
