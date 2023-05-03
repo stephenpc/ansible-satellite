@@ -29,9 +29,9 @@
 
     - name: ":::: Get list of all activation keys ::::"
       include_tasks: ./roles/satellite-content/tasks/get_activation_keys_for_org.yml
-      with_items: "{{ inventory_satellite }}"
-      vars:
-        organization: "{{ item.org|upper }}"
+#      with_items: "{{ inventory_satellite }}"
+#      vars:
+#        organization: "{{ org }}"
 
     - set_fact: 
         inventory_satellite: "{{ inventory_content }}"

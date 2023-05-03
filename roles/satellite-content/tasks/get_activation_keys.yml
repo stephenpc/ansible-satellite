@@ -24,12 +24,6 @@
 - set_fact:
     activation_keys_list: "{{ activation_keys_list_remove_title }}"
 
-- name: ":::: Create content inventory ::::"
-  include_tasks: ./create_content_inventory.yml
-  with_items: "{{ activation_keys_list }}"
-  vars:
-    activation_key: "{{ item }}"
-  when: activation_keys_list is defined and (activation_keys_list|length>0)
 
     
 
