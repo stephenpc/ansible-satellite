@@ -2,12 +2,19 @@
 # Create activation keys
 
   # Get all activation Keys
+
+- sec_fact:
+  inventory_content: []
+
 - name: ":::: Get Activation Keys for Organization ::::"
   include_tasks: ./get_activation_keys.yml
-  with_items: "{{ organizations_list }}"
-  vars:
-    initial_org: "{{ item }}"
 
+- name: ":::: Create content inventory ::::"
+  include_tasks: ./create_content_inventory.yml
+  with_items: "{{ activation_keys_list }}"
+  vars:
+    activation_key: "{{ item }}"
+    organization: "{{ initial_org }}"
 
     
 

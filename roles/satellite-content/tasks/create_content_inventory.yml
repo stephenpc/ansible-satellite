@@ -2,7 +2,7 @@
 # tasks file for satellite-clients
 - debug:
     msg: 
-     - "organization: {{ organization }}"
+     - "organization: {{ organization|upper }}"
      - "host: {{ host }}"
      - "activation_key: {{ activation_key }}"
      - "repos: {{ repos }}"
@@ -10,7 +10,7 @@
 
 - set_fact:
     node:  
-      organization: "{{ organization }}"
+      organization: "{{ organization|upper }}"
       host: "{{ host }}"
       activation_key: "{{ activation_key }}"
       repos: "{{ repos }}"

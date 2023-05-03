@@ -17,8 +17,17 @@
       vars:
         organization: "{{ item }}"
 
+    - set_fact: 
+        inventory_satellite: "{{ inventory_content }}"
+
     - name: ":::: Get list of all activation keys ::::"
-      import_tasks: ./roles/satellite-content/tasks/get_activation_keys_for_org.yml
+      include_tasks: ./roles/satellite-content/tasks/get_activation_keys_for_org.yml
+      with_items: "{{ inventory_satellite }}"
+      vars:
+        initial_org: "{{ item.organization }}"
+
+    - set_fact: 
+        inventory_satellite: "{{ inventory_content }}"
 
     - name: ":::: Get Host and Key subscriptions ::::"
       import_tasks: ./roles/satellite-content/tasks/get_nodes_for_keys.yml
