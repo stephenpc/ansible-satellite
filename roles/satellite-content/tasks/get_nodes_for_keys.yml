@@ -4,8 +4,13 @@
 # Get all nodes for activation Keys
 - name: ":::: Get Host and Key subscriptions ::::"
   include_tasks: ./get_nodes_for_key.yml
-  with_items: "{{ activation_keys_list }}"
+
+- name: Create report
+  include_tasks: ./create_content_inventory.yml
+  with_items: "{{ host_for_key_list }}"
   vars:
-    activationkey: "{{ item }}"
+    host: "{{ item }}"
+    activation_key: "{{ activationkey }}"
+  when: host_for_key_list is defined and (host_for_key_list|length>0)
 
     

@@ -35,6 +35,9 @@
       vars:
         initial_org: "{{ item.activation_key }}"
 
+    - set_fact: 
+        inventory_satellite: "{{ inventory_content }}"
+
     - name: ":::: Create content inventory ::::"
       import_tasks: ./roles/satellite-content/tasks/create_content_inventory.yml 
 
