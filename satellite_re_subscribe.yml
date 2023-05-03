@@ -1,35 +1,21 @@
 ---
 # ansible-satellite | Satellite 6.x Orchestration
-- hosts: satellite6-server-prod
-  become: yes
-  vars_files:
-    - group_vars/satellite.yml
-    - group_vars/secrets.yml
-  gather_facts: yes
-  
-  tasks:
-    # create dynamic groups to define variables
-    - group_by: 
-        key: "{{ ansible_distribution }}-{{ ansible_distribution_version | truncate(1, True, '') }}"
-
-    - set_fact: 
-        ak: "{{ ansible_distribution }}-{{ ansible_distribution_version | truncate(1, True, '') }}"
-
 - hosts: satellite
   become: yes
   vars_files:
     - group_vars/satellite.yml
     - group_vars/secrets.yml
-  gather_facts: yes
+  gather_facts: no
 
   tasks:
+
     - name: ":::: Get list of all activation keys ::::"
       import_tasks: ./roles/satellite-content/tasks/get_activation_keys.yml
 
     - name: ":::: Get Host and Key subscriptions ::::"
       import_tasks: ./roles/satellite-content/tasks/get_nodes_for_key.yml
       vars:
-        activationkey: "{{ groups[ak] }}"
+        activationkey: aap_ak # "{{ groups[ak] }}"
     
     - name: "Show lists of activation keys and nodes"
       ansible.builtin.debug:
@@ -45,6 +31,13 @@
   gather_facts: yes
   
   tasks:
+
+     # create dynamic groups to define variables
+    - group_by: 
+        key: "{{ ansible_distribution }}-{{ ansible_distribution_version | truncate(1, True, '') }}"
+
+    - set_fact: 
+        ak: "{{ ansible_distribution }}-{{ ansible_distribution_version | truncate(1, True, '') }}"
 
     - name: ":::: Unregister host ::::"
       import_tasks: ./roles/satellite-clients/tasks/client_unsubscribe.yml

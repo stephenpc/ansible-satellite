@@ -8,7 +8,9 @@
   register: activation_keys
 
 - debug:
-    msg: "{{ activation_keys.stdout.[3] }}"
+    msg: 
+     - "{{ activation_keys.stdout[3] }}"
+     - "{{ activation_keys.stdout[4] }}"
 
 - set_fact:
     activation_keys_list: "{{  activation_keys.stdout[2].split('|') | lower }}"
