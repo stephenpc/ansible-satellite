@@ -17,7 +17,6 @@ org_id: 1
 
 inventory_content: []
 aks: []
-organization: []
 host: []
 activation_key: []
 repos: []
