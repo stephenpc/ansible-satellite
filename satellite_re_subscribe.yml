@@ -1,6 +1,6 @@
 ---
 # ansible-satellite | Satellite 6.x Orchestration
-- hosts: localhost
+- hosts: satellite
   become: yes
   vars_files:
     - group_vars/satellite.yml
@@ -11,21 +11,18 @@
 
     - name: ":::: Get list of all activation keys ::::"
       import_tasks: ./roles/satellite-content/tasks/get_activation_keys.yml
-      delegate_to: satellite
 
     - name: ":::: Get Host and Key subscriptions ::::"
-      include_tasks: ./roles/satellite-content/tasks/get_nodes_for_key.yml
+      import_tasks: ./roles/satellite-content/tasks/get_nodes_for_key.yml
       with_items: "{{ activation_keys_list }}"
       vars:
         activationkey: "{{ item }}"
-      delegate_to: satellite
-    
-    - name: "Show lists of activation keys and nodes"
-      ansible.builtin.debug:
-       msg: 
-         - "BLANK"
-         #- "Activation keys list: {{ activation_keys_list }}"
-         #- "Nodes list: {{ahost_for_key_list }}"
+
+    - name: ":::: Create content inventory ::::"
+      import_tasks: ./roles/satellite-content/tasks/create_content_inventory.yml 
+
+    - name: ":::: Create content inventory file ::::"
+      import_tasks: ./roles/satellite-content/tasks/create_content_inventory_file.yml 
 
 - hosts: satellite6-server-prod
   become: yes

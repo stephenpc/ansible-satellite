@@ -1,0 +1,15 @@
+---
+# tasks file for satellite-clients
+- debug:
+    msg: 
+     - "host: {{ host }}"
+     - "ak: {{ activation_key }}"
+
+- set_facts:
+    node:  
+      host: "{{ host }}"
+      activation_key: "{{ activation_key }}"
+      repos: []
+
+- set_facts:
+    inventory_content: "{{ inventory_content + node }}"

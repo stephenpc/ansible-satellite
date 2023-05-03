@@ -24,12 +24,11 @@
 - set_fact:
     host_for_key_list: "{{ host_for_key_list_title }}"
 
-- debug:
-    msg: 
-     - "{{ activation_keys_list}}"
-
-- name: create inventory file
-  template: src=~/workspace/ansible_templates/somefile_template.j2 dest=/etc/somefile/apps-available/someproject.ini
-  delegate_to: localhost
+- name: Create report
+  include_task: create_content_inventory
+  with_items: "{{ host_for_key_list }}"
+  vars:
+    host: "{{ item }}"
+    activation_key: "{{ activationkey }}"
 
     
