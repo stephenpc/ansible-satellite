@@ -6,8 +6,8 @@
   include_tasks: ./get_nodes_for_key.yml
 
 - set_fact:
-    org: this.organization
-    activationkey: this.activation_key
+    org: "{{ item.organization}}"
+    activationkey: "{{ item.activation_key }}"
 
 - name: Create report
   include_tasks: ./create_content_inventory.yml
