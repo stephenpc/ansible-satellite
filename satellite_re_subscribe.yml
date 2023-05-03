@@ -12,7 +12,7 @@
         inventory_content: []
         activation_key: []
         host_name: []
-        repos: []
+        repos_host: []
 
     - name: ":::: Get organizations ::::"
       import_tasks: ./roles/satellite-content/tasks/get_orgs.yml
