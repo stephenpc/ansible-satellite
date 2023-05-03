@@ -10,8 +10,6 @@
   with_items: "{{ host_for_key_list }}"
   vars:
     host: "{{ item }}"
-    organization: "{{ organization }}"
-    activationkey: "{{ activation_key }}"
   when: host_for_key_list is defined and (host_for_key_list|length>0)
 
     
