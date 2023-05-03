@@ -29,7 +29,7 @@
       include_tasks: ./roles/satellite-content/tasks/get_activation_keys_for_org.yml
       with_items: "{{ inventory_satellite }}"
       vars:
-        org: "{{ item.organization|upper }}"
+        organization: "{{ item.organization|upper }}"
 
     - set_fact: 
         inventory_satellite: "{{ inventory_content }}"
