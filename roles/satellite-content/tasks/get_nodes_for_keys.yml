@@ -1,11 +1,11 @@
 ---
 # Create activation keys
 
-  # Get all activation Keys
+# Get all activation Keys
 - name: ":::: Get Host and Key subscriptions ::::"
-  import_tasks: ./get_node_for_key.yml
+  include_tasks: ./get_node_for_key.yml
   with_items: "{{ activation_keys_list }}"
-  include_vars:
+  vars:
     activationkey: "{{ item }}"
 
     
