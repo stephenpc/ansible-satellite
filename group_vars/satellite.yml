@@ -15,10 +15,7 @@ sat_hostname: "rhs"
 satellite_server: "{{ sat_hostname }}.{{ sat_domain }}"
 org_id: 1
 
-inventory_content: []
-aks: []
-host: []
-activation_key: []
+host_name: []
 repos: []
 
 
