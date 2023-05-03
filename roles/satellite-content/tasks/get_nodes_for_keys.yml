@@ -5,13 +5,15 @@
 - name: ":::: Get Host and Key subscriptions ::::"
   include_tasks: ./get_nodes_for_key.yml
 
+- set_fact: 
+    organization: "{{ organization }}"
+    activation_key: "{{ item.activation_key }}"
+
 - name: Create report
   include_tasks: ./create_content_inventory.yml
   with_items: "{{ host_for_key_list }}"
   vars:
     host: "{{ item }}"
-    organization: "{{ organization }}"
-    activation_key: "{{ item.activation_key }}"
   when: host_for_key_list is defined and (host_for_key_list|length>0)
 
     
