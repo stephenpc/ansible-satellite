@@ -7,6 +7,10 @@
     cmd: 'hammer activation-key list --organization {{ initial_org }}'
   register: activation_keys
 
+- debug:
+    msg: "{{ activation_keys.stdout.[item] }}"
+  with_items: "{{ activation_keys.stdout }}"
+
 - set_fact:
     activation_keys_list: "{{  activation_keys.stdout[2].split('|') | lower }}"
 
