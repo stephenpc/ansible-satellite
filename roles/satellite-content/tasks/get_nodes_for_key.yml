@@ -8,6 +8,28 @@
   register: host_for_key 
 
 - set_fact:
-    host_for_key_list: "{{ host_for_key.stdout }}"
+    host_for_key_list: "{{  host_for_key.stdout.split('\n') | lower }}"
+
+- set_fact:
+    separators: "{{ host_for_key_list[0] }}"
+    title: "{{ host_for_key_list[1] }}"
+    number_of_servers_keys: "{{ host_for_key_list|length }}"
+
+- set_fact:
+    host_for_key_list_lines: "{{ host_for_key_list|reject('search', separators)|list }}"
+
+- set_fact:
+    host_for_key_list_title: "{{ host_for_key_list_lines|reject('search', title)|list }}"
+
+- set_fact:
+    host_for_key_list: "{{ host_for_key_list_title }}"
+
+- debug:
+    msg: 
+     - "{{ activation_keys_list}}"
+
+- name: create inventory file
+  template: src=~/workspace/ansible_templates/somefile_template.j2 dest=/etc/somefile/apps-available/someproject.ini
+  delegate_to: localhost
 
     

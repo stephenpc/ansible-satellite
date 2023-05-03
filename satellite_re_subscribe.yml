@@ -1,6 +1,6 @@
 ---
 # ansible-satellite | Satellite 6.x Orchestration
-- hosts: satellite
+- hosts: localhost
   become: yes
   vars_files:
     - group_vars/satellite.yml
@@ -11,11 +11,14 @@
 
     - name: ":::: Get list of all activation keys ::::"
       import_tasks: ./roles/satellite-content/tasks/get_activation_keys.yml
+      delegate_to: satellite
 
     - name: ":::: Get Host and Key subscriptions ::::"
       import_tasks: ./roles/satellite-content/tasks/get_nodes_for_key.yml
+      with_items: "{{ activation_keys_list }}"
       vars:
-        activationkey: aap_ak # "{{ groups[ak] }}"
+        activationkey: "{{ item }}"
+      delegate_to: satellite
     
     - name: "Show lists of activation keys and nodes"
       ansible.builtin.debug:
