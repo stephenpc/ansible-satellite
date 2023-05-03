@@ -24,9 +24,6 @@
 - set_fact:
     activation_keys_list: "{{ activation_keys_list_remove_title }}"
 
-- debug:
-    msg: 
-     - "{{ activation_keys_list }}"
 
 
     

@@ -38,11 +38,10 @@
     - set_fact: 
         inventory_satellite: "{{ inventory_content }}"
 
-    - name: ":::: Create content inventory ::::"
-      import_tasks: ./roles/satellite-content/tasks/create_content_inventory.yml 
-
     - name: ":::: Create content inventory file ::::"
-      import_tasks: ./roles/satellite-content/tasks/create_content_inventory_file.yml 
+      include_tasks: ./roles/satellite-content/tasks/create_content_inventory_file.yml 
+      vars:
+        inventory_content: "{{ inventory_satellite }}"
 
 - hosts: satellite6-server-prod
   become: yes
