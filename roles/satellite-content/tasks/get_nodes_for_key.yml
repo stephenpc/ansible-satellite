@@ -4,7 +4,7 @@
   # Get all activation Keys
 - name: Get node for specific key
   shell:
-    cmd: 'hammer host list --search activation_key={{ activationkey }} --fields name'
+    cmd: 'hammer host list --search activation_key={{ activation_key }} --fields name'
   register: host_for_key 
 
 - set_fact:
