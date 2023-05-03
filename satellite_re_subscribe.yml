@@ -9,7 +9,7 @@
 
   tasks:
     - name: ":::: Get organizations ::::"
-      import_role: ./roles/satellite-content/tasks/get_orgs.yml
+      include_tasks: ./roles/satellite-content/tasks/get_orgs.yml
 
     - name: ":::: Get list of all activation keys ::::"
       include_tasks: ./roles/satellite-content/tasks/get_activation_keys.yml
