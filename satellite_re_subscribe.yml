@@ -21,6 +21,10 @@
         inventory_satellite: "{{ inventory_content }}"
         inventory_content: []
 
+    - debug:
+        msg:
+          - "{{ inventory_satellite }}"
+
     - name: ":::: Get list of all activation keys ::::"
       include_tasks: ./roles/satellite-content/tasks/get_activation_keys_for_org.yml
       with_items: "{{ inventory_satellite }}"
