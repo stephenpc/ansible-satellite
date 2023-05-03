@@ -19,7 +19,7 @@
       with_items: "{{ organizations_list }}"
       vars:
         node:
-          organization: "{{ item|uper }}"
+          organization: "{{ item|upper }}"
           host: ""
           activationkey: ""
           repos: ""
