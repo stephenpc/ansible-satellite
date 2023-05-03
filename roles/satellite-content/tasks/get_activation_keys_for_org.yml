@@ -3,7 +3,7 @@
 
   # Get all activation Keys
 
-- sec_fact:
+- set_fact:
   inventory_content: []
 
 - name: ":::: Get Activation Keys for Organization ::::"
