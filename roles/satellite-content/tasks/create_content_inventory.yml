@@ -5,11 +5,11 @@
      - "host: {{ host }}"
      - "ak: {{ activation_key }}"
 
-- set_facts:
+- set_fact:
     node:  
       host: "{{ host }}"
       activation_key: "{{ activation_key }}"
       repos: []
 
-- set_facts:
+- set_fact:
     inventory_content: "{{ inventory_content + node }}"
