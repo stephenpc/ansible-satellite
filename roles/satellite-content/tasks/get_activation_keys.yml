@@ -14,6 +14,8 @@
     separators: "{{ activation_keys_list[0] }}"
     title: "{{ activation_keys_list[1] }}"
     Number_of_keys: "{{ activation_keys_list|length }}"
+
+- set_fact:
     activation_keys_list_remove_lines: "{{ activation_keys_list|reject('search', separators)|list }}"
 
 - set_fact:
