@@ -2,7 +2,7 @@
 # Create activation keys
 
   # Get all activation Keys
-- name: Install new satellite certs
+- name: Get list of all activation keys
   shell:
     cmd: 'hammer activation-key list --organization {{ initial_org }}'
   register: activation_keys_list 
