@@ -24,9 +24,6 @@
 - set_fact:
     organizations_list: "{{ organizations_list_remove_title }}"
 
-- debug:
-    msg: 
-     - "{{ organizations_list }}"
 
 
     
