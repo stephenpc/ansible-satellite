@@ -1,18 +1,18 @@
 ---
 # ansible-satellite group vars
 
-initial_org: "Default Organization"
-initial_loc: "Default Location"
+initial_org: "RD"
+initial_loc: "MX"
 initial_user: "admin"
-sat_admin_email: "some-admin-user@yourdomain.com"
+sat_admin_email: "psehgaft@redhat.com"
 sat_admin_firstname: "Admin"
-sat_admin_lastname: "User"
+sat_admin_lastname: "RedHat"
 
 # Place the file with this name in the roles/satellite-setup/files folder
 sat_manifest: "manifest.zip"
 
-sat_domain: "twsfd.example.opentlc.com/"
-sat_hostname: "satellite"
+sat_domain: "lnx.demo.rd"
+sat_hostname: "rhs"
 satellite_server: "{{ sat_hostname }}.{{ sat_domain }}"
 org_id: 1
 
