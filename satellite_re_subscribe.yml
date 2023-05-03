@@ -9,10 +9,6 @@
 
   tasks:
     - set_fact: 
-        inventory_content: []
-        activation_key: []
-        host_name: []
-        repos_host: []
 
     - name: ":::: Get organizations ::::"
       import_tasks: ./roles/satellite-content/tasks/get_orgs.yml
@@ -21,7 +17,11 @@
       include_tasks: ./roles/satellite-content/tasks/create_content_inventory.yml
       with_items: "{{ organizations_list }}"
       vars:
-        organization: "{{ item }}"
+        host:
+          organization: "{{ item }}"
+          host: ""
+          activationkey: ""
+          repo: ""
 
     - set_fact: 
         inventory_satellite: "{{ inventory_content }}"
@@ -29,9 +29,9 @@
 
     - name: ":::: Get list of all activation keys ::::"
       include_tasks: ./roles/satellite-content/tasks/get_activation_keys_for_org.yml
-#      with_items: "{{ inventory_satellite }}"
-#      vars:
-#        organization: "{{ org }}"
+      with_items: "{{ inventory_satellite }}"
+      vars:
+        organization: "{{ item.organization }}"
 
     - set_fact: 
         inventory_satellite: "{{ inventory_content }}"

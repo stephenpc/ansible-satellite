@@ -1,18 +1,10 @@
 ---
 # tasks file for satellite-clients
-- debug:
-    msg: 
-     - "org: {{ organization }}"
-     - "host: {{ host_name }}"
-     - "activation_key: {{ activation_key }}"
-     - "repos: {{ repos_host }}"
-
-- set_fact:
-    node:  
-      org: "{{ organization }}"
-      host: "{{ host_name }}"
-      activationkey: "{{ activation_key }}"
-      repos: "{{ repos_host }}"
+# node:  
+#   organization: "{{ organization }}"
+#   host: "{{ host }}"
+#   activationkey: "{{ activationkey }}"
+#   repos: "{{ repos }}"
 
 - set_fact:
     inventory_content: "{{ inventory_content +  [node] }}"
