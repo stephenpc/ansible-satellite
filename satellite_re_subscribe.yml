@@ -20,8 +20,9 @@
     - name: "Show lists of activation keys and nodes"
       ansible.builtin.debug:
        msg: 
-         - "Activation keys list: {{ activation_keys_list }}"
-         - "Nodes list: {{ahost_for_key_list }}"
+         - "BLANK"
+         #- "Activation keys list: {{ activation_keys_list }}"
+         #- "Nodes list: {{ahost_for_key_list }}"
 
 - hosts: satellite6-server-prod
   become: yes

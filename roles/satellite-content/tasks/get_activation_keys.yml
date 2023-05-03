@@ -11,8 +11,8 @@
     msg: 
      - "{{ activation_keys.stdout }}"
 
-#- set_fact:
-#    activation_keys_list: "{{  activation_keys.stdout[2].split('|') | lower }}"
+- set_fact:
+    activation_keys_list: "{{  activation_keys.stdout.split('|') | lower }}"
 
 
     
