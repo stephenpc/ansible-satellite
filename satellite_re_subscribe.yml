@@ -18,11 +18,11 @@
       include_tasks: ./roles/satellite-content/tasks/create_content_inventory.yml
       with_items: "{{ organizations_list }}"
       vars:
-        host:
-          organization: "{{ item }}"
+        node:
+          organization: "{{ item|uper }}"
           host: ""
           activationkey: ""
-          repo: ""
+          repos: ""
 
     - set_fact: 
         inventory_satellite: "{{ inventory_content }}"
