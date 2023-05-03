@@ -3,9 +3,6 @@
 
   # Get all activation Keys
 
-- set_fact:
-    inventory_content: []
-
 - name: ":::: Get Activation Keys for Organization ::::"
   include_tasks: ./get_activation_keys.yml
 

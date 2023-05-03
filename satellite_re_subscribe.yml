@@ -19,6 +19,7 @@
 
     - set_fact: 
         inventory_satellite: "{{ inventory_content }}"
+        inventory_content: []
 
     - name: ":::: Get list of all activation keys ::::"
       include_tasks: ./roles/satellite-content/tasks/get_activation_keys_for_org.yml
@@ -28,6 +29,7 @@
 
     - set_fact: 
         inventory_satellite: "{{ inventory_content }}"
+        inventory_content: []
 
     - name: ":::: Get Host and Key subscriptions ::::"
       include_tasks: ./roles/satellite-content/tasks/get_nodes_for_keys.yml
@@ -37,6 +39,7 @@
 
     - set_fact: 
         inventory_satellite: "{{ inventory_content }}"
+        inventory_content: []
 
     - name: ":::: Create content inventory file ::::"
       include_tasks: ./roles/satellite-content/tasks/create_content_inventory_file.yml 
