@@ -23,10 +23,7 @@
     - set_fact: 
         inventory_satellite: "{{ inventory_content }}"
         inventory_content: []
-
-    - debug:
-        msg:
-          - "{{ inventory_satellite }}"
+        activation_key: []
 
     - name: ":::: Get list of all activation keys ::::"
       include_tasks: ./roles/satellite-content/tasks/get_activation_keys_for_org.yml
