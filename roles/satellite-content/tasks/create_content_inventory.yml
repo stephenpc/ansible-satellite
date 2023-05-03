@@ -16,4 +16,4 @@
       repos: "{{ repos }}"
 
 - set_fact:
-    inventory_content: inventory_content + "{{ node }}"
+    inventory_content: "{{ inventory_content +  [node] }}"
