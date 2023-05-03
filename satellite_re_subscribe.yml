@@ -40,7 +40,7 @@
       with_items: "{{ inventory_satellite }}"
       vars:
         organization: "{{ item.organization }}"
-        activationkey: "{{ item.activation_key }}"
+        activation_key: "{{ item.activation_key }}"
 
     - set_fact: 
         inventory_satellite: "{{ inventory_content }}"
