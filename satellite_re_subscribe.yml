@@ -16,6 +16,7 @@
         ak: "{{ ansible_distribution }}-{{ ansible_distribution_version | truncate(1, True, '') }}"
 
 - hosts: satellite
+  become: yes
   vars_files:
     - group_vars/satellite.yml
     - group_vars/secrets.yml
