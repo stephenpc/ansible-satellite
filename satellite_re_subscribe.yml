@@ -41,7 +41,7 @@
       include_tasks: ./roles/satellite-content/tasks/get_nodes_for_keys.yml
       with_items: "{{ inventory_satellite }}"
       vars:
- #       organization: "{{ item.org }}"
+        organization: "{{ item.org }}"
         activation_key: "{{ item.activationkey }}"
 
     - set_fact: 

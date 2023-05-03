@@ -5,6 +5,10 @@
 - name: ":::: Get Host and Key subscriptions ::::"
   include_tasks: ./get_nodes_for_key.yml
 
+- set_facs:
+    org: this.organization
+    activationkey: this.activation_key
+
 - name: Create report
   include_tasks: ./create_content_inventory.yml
   with_items: "{{ host_for_key_list }}"
