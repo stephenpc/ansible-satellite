@@ -27,7 +27,7 @@
 - name: Create report
   include_task: ./create_content_inventory.yml
   with_items: "{{ host_for_key_list }}"
-  vars:
+  include_vars:
     host: "{{ item }}"
     activation_key: "{{ activationkey }}"
 

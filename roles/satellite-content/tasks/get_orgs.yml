@@ -1,0 +1,35 @@
+---
+# Create activation keys
+
+  # Get all activation Keys
+- name: Get list of all activation keys
+  shell:
+    cmd: 'hammer org list --fields name'
+  register: organizations
+
+- set_fact:
+    organizations_list: "{{  organizations.stdout.split('\n') | lower }}"
+
+- set_fact:
+    separators: "{{ organizations_list[0] }}"
+    title: "{{ organizations_list[1] }}"
+    number_of_keys: "{{ organizations_list|length }}"
+
+- set_fact:
+    organizations_list_remove_lines: "{{ organizations_list|reject('search', separators)|list }}"
+
+- set_fact:
+    organizations_list_remove_title: "{{ organizations_list_remove_lines|reject('search', title)|list }}"
+
+- set_fact:
+    organizations_list: "{{ organizations_list_remove_title }}"
+
+- debug:
+    msg: 
+     - "{{ organizations_list }}"
+
+
+    
+
+
+    

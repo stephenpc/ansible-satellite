@@ -4,18 +4,7 @@ rhs.lnx.demo.rd
 [old_satellite]
 rhs.lnx.demo.rd
 
-# [puppet_master]
-# satellite.example.com
-
-# [puppet_ca]
-# satellite.example.com
-
 [satellite6-server-prod]
 #3.144.121.168
 student1.twsfd.example.opentlc.com
 
-[RedHat-8.6]
-activationkey=RHEL7_Prod
-
-[RedHat-7]
-activationkey=''
