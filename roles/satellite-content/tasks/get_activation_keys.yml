@@ -8,7 +8,7 @@
   register: activation_keys_list 
 
 - set_fact:
-    activation_keys_list: {{ activation_keys.stdout[2] | split('|') }}"
+    activation_keys_list: "{{ activation_keys.stdout[2] | split('|') }}"
 
 
     
