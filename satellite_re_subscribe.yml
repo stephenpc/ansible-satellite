@@ -9,6 +9,7 @@
 
   tasks:
     - set_fact: 
+        inventory_content: []
 
     - name: ":::: Get organizations ::::"
       import_tasks: ./roles/satellite-content/tasks/get_orgs.yml
