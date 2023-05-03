@@ -6,7 +6,7 @@
   include_tasks: ./get_nodes_for_key.yml
 
 - set_fact:
-    org: "{{ organization.vale }}"
+    org: "{{ organization.value }}"
     activationkey: "{{ activation_key.value }}"
 
 - name: Create report
