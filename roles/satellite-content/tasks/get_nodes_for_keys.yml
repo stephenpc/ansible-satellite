@@ -3,7 +3,7 @@
 
   # Get all activation Keys
 - name: ":::: Get Host and Key subscriptions ::::"
-  include_tasks: get_node_for_key
+  include_tasks: ./get_node_for_key.yml
   with_items: "{{ activation_keys_list }}"
   vars:
     activationkey: "{{ item }}"
