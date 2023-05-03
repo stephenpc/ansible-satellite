@@ -12,7 +12,7 @@
       import_tasks: ./roles/satellite-content/tasks/get_orgs.yml
     
     - name: ":::: Create content inventory ::::"
-      import_tasks: ./roles/satellite-content/tasks/create_content_inventory.yml
+      include_tasks: ./roles/satellite-content/tasks/create_content_inventory.yml
       wich_items: "{{ organizations_list }}"
       include_vars:
         organization: "{{ item }}"
