@@ -1,0 +1,14 @@
+---
+# tasks file for satellite-clients
+- debug:
+    msg: 
+     - "organizaion: {{ organizaion }}"
+     - "ak: {{ activation_key }}"
+
+- set_fact:
+    aks:  
+      organizaion: "{{ hoorganizaionst }}"
+      activation_key: "{{ activation_key }}"
+
+- set_fact:
+    aks_list: aks_list + "{{ aks }}"

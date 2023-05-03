@@ -1,0 +1,15 @@
+---
+# Create activation keys
+
+  # Get all activation Keys
+- name: ":::: Get Activation Keys for Organization ::::"
+  include_tasks: ./get_activation_keys.yml
+  with_items: "{{ organizations_list }}"
+  vars:
+    initial_org: "{{ item }}"
+
+
+    
+
+
+    

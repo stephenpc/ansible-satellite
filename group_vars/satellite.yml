@@ -17,6 +17,12 @@ satellite_server: "{{ sat_hostname }}.{{ sat_domain }}"
 org_id: 1
 
 inventory_content: []
+aks: []
+organization: []
+host: []
+activation_key: []
+repos: []
+
 
 #slack_token: "SOME-SUPER-LONG-SLACK-TOKEN-HERE"
 #slack_user: "SLACK-USERNAME"
