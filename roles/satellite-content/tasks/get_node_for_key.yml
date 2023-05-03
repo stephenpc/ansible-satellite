@@ -2,7 +2,7 @@
 # Create activation keys
 
   # Get all activation Keys
-- name: Install new satellite certs
+- name: Get node for specific key
   shell:
     cmd: 'hammer host list --search activation_key={{ activationkey }} --fields name'
   register: host_for_key 
