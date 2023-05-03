@@ -25,9 +25,9 @@
     host_for_key_list: "{{ host_for_key_list_title }}"
 
 - name: Create report
-  include_task: ./create_content_inventory.yml
+  include_tasks: ./create_content_inventory.yml
   with_items: "{{ host_for_key_list }}"
-  include_vars:
+  vars:
     host: "{{ item }}"
     activation_key: "{{ activationkey }}"
 
