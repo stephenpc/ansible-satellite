@@ -13,9 +13,9 @@
     
     - name: ":::: Create content inventory ::::"
       include_tasks: ./roles/satellite-content/tasks/create_content_inventory.yml
-      wich_items: "{{ organizations_list }}"
-      include_vars:
-        organization: "{{ item }}"
+      with_items: "{{ organizations_list }}"
+#      include_vars:
+#        organization: "{{ item }}"
 
     - name: ":::: Get list of all activation keys ::::"
       import_tasks: ./roles/satellite-content/tasks/get_activation_keys_for_org.yml
