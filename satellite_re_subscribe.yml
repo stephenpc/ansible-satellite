@@ -13,10 +13,7 @@
       import_tasks: ./roles/satellite-content/tasks/get_activation_keys.yml
 
     - name: ":::: Get Host and Key subscriptions ::::"
-      include_tasks: ./roles/satellite-content/tasks/get_nodes_for_key.yml
-      with_items: "{{ activation_keys_list }}"
-      vars:
-        activationkey: "{{ item }}"
+      import_tasks: ./roles/satellite-content/tasks/get_nodes_for_keys.yml
 
     - name: ":::: Create content inventory ::::"
       import_tasks: ./roles/satellite-content/tasks/create_content_inventory.yml 
