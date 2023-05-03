@@ -7,7 +7,7 @@
   include_tasks: ./get_activation_keys.yml
 
 - set_fact:
-    organization: "{{ initial_org }}"
+    organization: "{{ organization }}"
 
 - name: ":::: Create content inventory ::::"
   include_tasks: ./create_content_inventory.yml

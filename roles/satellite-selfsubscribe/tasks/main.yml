@@ -26,7 +26,7 @@
 - name: "Refresh the manifest from the Red Hat Portal"
   command: >
     /bin/hammer subscription refresh-manifest
-    --organization "{{ initial_org }}"
+    --organization "{{ organization }}"
 
 # Remove Satellite certificates
 - name: Uninstall certificates package if installed
@@ -49,7 +49,7 @@
 # Check registration status of the system
 - name: Subscribe the Satellite Server to itself
   command: >
-    /sbin/subscription-manager register --org "{{ initial_org | replace(' ','_') }}" --activationkey "{{ self_subscribe_key }}"
+    /sbin/subscription-manager register --org "{{ organization | replace(' ','_') }}" --activationkey "{{ self_subscribe_key }}"
   ignore_errors: yes
 
 # Remove automatically attached subscriptions

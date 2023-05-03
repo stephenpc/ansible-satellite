@@ -29,7 +29,7 @@
       include_tasks: ./roles/satellite-content/tasks/get_activation_keys_for_org.yml
       with_items: "{{ inventory_satellite }}"
       vars:
-        initial_org: "{{ item.organization }}"
+        organization: "{{ item.organization }}"
 
     - set_fact: 
         inventory_satellite: "{{ inventory_content }}"
@@ -39,7 +39,8 @@
       include_tasks: ./roles/satellite-content/tasks/get_nodes_for_keys.yml
       with_items: "{{ inventory_satellite }}"
       vars:
-        initial_org: "{{ item.activation_key }}"
+        organization: "{{ item.organization }}"
+        activationkey: "{{ item.activation_key }}"
 
     - set_fact: 
         inventory_satellite: "{{ inventory_content }}"
@@ -66,13 +67,16 @@
     - set_fact: 
         ak: "{{ ansible_distribution }}-{{ ansible_distribution_version | truncate(1, True, '') }}"
 
+    - name: ":::: Get repos for host ::::"
+      include_tasks: 
+
     - name: ":::: Unregister host ::::"
-      import_tasks: ./roles/satellite-clients/tasks/client_unsubscribe.yml
+      include_tasks: ./roles/satellite-clients/tasks/client_unsubscribe.yml
       vars:
         satellite: "{{ groups['old_satellite'][0] }}"
     
     - name: ":::: Register host ::::"
-      import_tasks: ./roles/satellite-clients/tasks/client_unsubscribe.yml
+      include_tasks: ./roles/satellite-clients/tasks/client_unsubscribe.yml
       vars:
         satellite: "{{ groups['satellite'][0] }}"
         activationkey: "{{ groups[ak] }}"

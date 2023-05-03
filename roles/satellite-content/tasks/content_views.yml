@@ -5,7 +5,7 @@
   - name: Creating content view(s)
     command: >
       /bin/hammer content-view create
-      --organization "{{ initial_org }}"
+      --organization "{{ organization }}"
       --name "{{ item.name }}"
       --description "{{ item.description }}"
     register: create_content_view
@@ -20,7 +20,7 @@
   - name: Updating defined content view(s)
     command: >
       /bin/hammer content-view update
-      --organization "{{ initial_org }}"
+      --organization "{{ organization }}"
       --name "{{ item.item.name }}"
       --description "{{ item.item.description }}"
     register: update_content_view
@@ -37,7 +37,7 @@
   - name: Assign repositories to content views via repository ids
     command: >
       /bin/hammer content-view update
-      --organization "{{ initial_org }}"
+      --organization "{{ organization }}"
       --name "{{ item.name }}"
       --repository-ids "{{ item.repo_ids | join(',') }}"
     register: update_content_view
@@ -52,7 +52,7 @@
   - name: Creating content view package filter(s)
     command: >
       /bin/hammer content-view filter create
-      --organization "{{ initial_org }}"
+      --organization "{{ organization }}"
       --name "{{ item.name }}"
       --content-view "{{ item.applytocv }}"
       --inclusion "{{ item.inclusion | default(yes) }}"
@@ -71,7 +71,7 @@
   - name: Add content filter rules by package
     command: >
       /bin/hammer content-view filter rule create
-      --organization "{{ initial_org }}"
+      --organization "{{ organization }}"
       --name "{{ item.1 }}"
       --content-view "{{ item.0.applytocv }}"
       --content-view-filter "{{ item.0.name }}"
@@ -91,7 +91,7 @@
   - name: Applying repository restrictions to package filters
     command: >
       /bin/hammer content-view filter update
-      --organization "{{ initial_org }}"
+      --organization "{{ organization }}"
       --name "{{ item.name }}"
       --content-view "{{ item.applytocv }}"
       --repository-ids "{{ item.repo_ids | join(',') }}"
@@ -109,7 +109,7 @@
   - name: Creating content view date filter(s)
     command: >
       /bin/hammer content-view filter create
-      --organization "{{ initial_org }}"
+      --organization "{{ organization }}"
       --name "{{ item.name }}"
       --content-view "{{ item.applytocv }}"
       --inclusion "{{ item.inclusion | default(no) }}"
@@ -128,7 +128,7 @@
   - name: Add content filter rules by start date
     command: >
       /bin/hammer content-view filter rule create
-      --organization "{{ initial_org }}"
+      --organization "{{ organization }}"
       --content-view "{{ item.applytocv }}"
       --content-view-filter "{{ item.name }}"
       --start-date "{{ item.start_date }}"
@@ -148,7 +148,7 @@
   - name: Applying repository restrictions to date filters
     command: >
       /bin/hammer content-view filter update
-      --organization "{{ initial_org }}"
+      --organization "{{ organization }}"
       --name "{{ item.name }}"
       --content-view "{{ item.applytocv }}"
       --repository-ids "{{ item.repo_ids | join(',') }}"
@@ -166,7 +166,7 @@
   - name: Publish content views to the Library environment
     command: >
       /bin/hammer content-view publish
-      --organization "{{ initial_org }}"
+      --organization "{{ organization }}"
       --name "{{ item.name }}"
     register: publish_content_view
     with_items: sat_content_views
@@ -181,7 +181,7 @@
   - name: Promote initial content views from the Library to their respective environments
     command: >
       /bin/hammer content-view version promote
-      --organization "{{ initial_org }}"
+      --organization "{{ organization }}"
       --content-view "{{ item.0.name }}"
       --to-lifecycle-environment "{{ item.1 }}"
       --version "1.0"

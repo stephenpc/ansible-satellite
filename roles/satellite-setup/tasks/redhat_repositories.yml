@@ -5,7 +5,7 @@
   - name: Enable repositories
     command: >
       /bin/hammer repository-set enable
-      --organization "{{ initial_org }}"
+      --organization "{{ organization }}"
       --product "{{ item.0.name }}"
       --name "{{ item.1.name }}"
       {{ item.1.options }}

@@ -21,7 +21,7 @@ sat_lifecycle:
 
 # List content view details. View names must have no spaces.
 # Repositories you want to include, should match the IDs output by
-# hammer repository list --organization "{{ initial_org }}" and should be
+# hammer repository list --organization "{{ organization }}" and should be
 # separated by commas. Take a look at satellite-setup/vars/main.yml for ordering
 # Satellite 6.2 will fix the bug in hammer that allows you to specify repository names
 # when adding repository sets. Will update the code after release to take that into account

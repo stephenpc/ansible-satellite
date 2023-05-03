@@ -80,7 +80,7 @@
 - name: Creating content view package filter(s)
   command: >
     /bin/hammer content-view filter create
-    --organization "{{ initial_org }}"
+    --organization "{{ organization }}"
     --name "{{ item.name }}"
     --content-view "{{ item.content_view_name }}"
     --inclusion "{{ item.is_inclusion }}"
@@ -99,7 +99,7 @@
 - name: Add content filter rules by package
   command: >
     /bin/hammer content-view filter rule create
-    --organization "{{ initial_org }}"
+    --organization "{{ organization }}"
     --name "{{ item.1.name }}"
     --content-view "{{ item.0.content_view_name }}"
     --content-view-filter "{{ item.0.name }}"
@@ -119,7 +119,7 @@
 - name: Applying repository restrictions to package filters
   command: >
     /bin/hammer content-view filter update
-    --organization "{{ initial_org }}"
+    --organization "{{ organization }}"
     --name "{{ item.name }}"
     --content-view "{{ item.content_view_name }}"
     --repository-ids "{{ item.repositories | join(',') }}"
@@ -137,7 +137,7 @@
 - name: Creating content view erratum filters using date exclusion
   command: >
     /bin/hammer content-view filter create
-    --organization "{{ initial_org }}"
+    --organization "{{ organization }}"
     --name "{{ item.name | replace('-cv','') }}-dated_to_{{ ansible_date_time.month }}{{ ansible_date_time.day }}{{ ansible_date_time.year }}"
     --content-view "{{ item.name }}"
     --inclusion "{{ sat_content_orchestration.date_filters.inclusion }}"
@@ -157,7 +157,7 @@
 - name: Exclude erratum updated after todays date
   command: >
     /bin/hammer content-view filter rule create
-    --organization "{{ initial_org }}"
+    --organization "{{ organization }}"
     --content-view "{{ item.name }}"
     --content-view-filter "{{ item.name | replace('-cv','') }}-dated_to_{{ ansible_date_time.month }}{{ ansible_date_time.day }}{{ ansible_date_time.year }}"
     --start-date "{{ sat_content_orchestration.date_filters.start_date }}"

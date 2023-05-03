@@ -5,7 +5,7 @@
   - name: Synchronize Red Hat yum repositories in the background
     command: >
       /bin/hammer product synchronize
-      --organization "{{ initial_org }}"
+      --organization "{{ organization }}"
       --name "{{ item.name }}"
       --async
     with_items: sat_products
@@ -15,7 +15,7 @@
   - name: Synchronize Docker repositories in the background
     command: >
       /bin/hammer product synchronize
-      --organization "{{ initial_org }}"
+      --organization "{{ organization }}"
       --name "{{ item.name }}"
       --async
     with_items: sat_docker_products
@@ -25,7 +25,7 @@
   - name: Synchronize third-party repositories in the background
     command: >
       /bin/hammer product synchronize
-      --organization "{{ initial_org }}"
+      --organization "{{ organization }}"
       --name "{{ item.name }}"
       --async
     with_items: sat_thirdparty_products

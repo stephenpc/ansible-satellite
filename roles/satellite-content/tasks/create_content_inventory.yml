@@ -7,7 +7,6 @@
      - "activation_key: {{ activation_key }}"
      - "repos: {{ repos }}"
 
-
 - set_fact:
     node:  
       organization: "{{ organization|upper }}"

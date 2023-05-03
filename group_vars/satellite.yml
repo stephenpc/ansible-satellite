@@ -1,7 +1,6 @@
 ---
 # ansible-satellite group vars
 
-initial_org: "RD"
 initial_loc: "MX"
 initial_user: "admin"
 sat_admin_email: "psehgaft@redhat.com"

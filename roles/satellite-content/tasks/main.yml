@@ -6,7 +6,7 @@
     fail:
       msg: "You must pass an organization and a location to this role. Please see README.md for more detail."
     when: >
-      initial_org is not defined
+      organization is not defined
       or initial_loc is not defined
 
   # Wait for primary sync to finish if wait_on_sync is true/yes
