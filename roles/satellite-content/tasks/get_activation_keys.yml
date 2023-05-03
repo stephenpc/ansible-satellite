@@ -4,16 +4,15 @@
   # Get all activation Keys
 - name: Get list of all activation keys
   shell:
-    cmd: 'hammer activation-key list --organization {{ initial_org }}'
+    cmd: 'hammer activation-key list --organization {{ initial_org }} --fields name'
   register: activation_keys
 
 - debug:
     msg: 
-     - "{{ activation_keys.stdout[3] }}"
-     - "{{ activation_keys.stdout[4] }}"
+     - "{{ activation_keys.stdout }}"
 
-- set_fact:
-    activation_keys_list: "{{  activation_keys.stdout[2].split('|') | lower }}"
+#- set_fact:
+#    activation_keys_list: "{{  activation_keys.stdout[2].split('|') | lower }}"
 
 
     
