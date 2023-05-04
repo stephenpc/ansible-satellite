@@ -4,7 +4,7 @@
   vars_files:
     - group_vars/satellite.yml
     - group_vars/secrets.yml
-  gather_facts: yes
+  gather_facts: no
   
   tasks:
 # create dynamic groups to define variables
