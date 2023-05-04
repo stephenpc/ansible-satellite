@@ -7,12 +7,12 @@
   gather_facts: yes
   
   tasks:
-     # create dynamic groups to define variables
-    - group_by: 
-        key: "{{ ansible_distribution }}-{{ ansible_distribution_version | truncate(1, True, '') }}"
+# create dynamic groups to define variables
+#    - group_by: 
+#        key: "{{ ansible_distribution }}-{{ ansible_distribution_version | truncate(1, True, '') }}"
 
-    - set_fact: 
-        ak: "{{ ansible_distribution }}-{{ ansible_distribution_version | truncate(1, True, '') }}"
+#    - set_fact: 
+#        ak: "{{ ansible_distribution }}-{{ ansible_distribution_version | truncate(1, True, '') }}"
 
     - name: ":::: Get repos for host ::::"
       include_tasks: roles/satellite-clients/tasks/client_get_enable_repos.yml

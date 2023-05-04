@@ -7,23 +7,46 @@
   gather_facts: yes
   
   tasks:
-     # create dynamic groups to define variables
-    - group_by: 
-        key: "{{ ansible_distribution }}-{{ ansible_distribution_version | truncate(1, True, '') }}"
+    - name: '{{ company }} :::: {{ policy }} ::::  API procedure - Generating Host Registration Command'
+      ansible.builtin.uri:
+        url:      "{{ satellite_url }}/api/registration_commands"
+        user:     "{{ user_registration    }}"
+        password: "{{ passwd_registration  }}"
+        force_basic_auth: yes
+        return_content: yes 
+        method: POST
+        body_format: json
+        headers:
+          Content-Type: application/json
+        body: '{ "registration_command": { "activation_keys": ["{{ rhsm_activation_key }}"] }}'
+        validate_certs: no
+      register: host_registration
 
-    - set_fact: 
-        ak: "{{ ansible_distribution }}-{{ ansible_distribution_version | truncate(1, True, '') }}"
+    - name: '{{ company }} :::: {{ policy }} :::: Get CA file'
+      ansible.builtin.get_url:
+        url: "{{ satellite_url }}/pub/katello-server-ca.crt"
+        dest: /etc/pki/ca-trust/source/anchors/
+        validate_certs: no
 
-    - name: ":::: Get repos for host ::::"
-      include_tasks: roles/satellite-clients/tasks/client_get_enable_repos.yml
+    - name: '{{ company }} :::: {{ policy }} :::: update-ca-trust enable'
+      ansible.builtin.command:
+        cmd: update-ca-trust enable
 
-    - name: ":::: Unregister host ::::"
-      include_tasks: ./roles/satellite-clients/tasks/client_unsubscribe.yml
-      vars:
-        satellite: "{{ groups['old_satellite'][0] }}"
-    
-    - name: ":::: Register host ::::"
-      include_tasks: ./roles/satellite-clients/tasks/client_unsubscribe.yml
-      vars:
-        satellite: "{{ groups['satellite'][0] }}"
-        activationkey: "{{ groups[ak] }}"
+    - name: '{{ company }} :::: {{ policy }} :::: update-ca-trust '
+      ansible.builtin.command:
+        cmd: update-ca-trust 
+
+    - name: '{{ company }} :::: {{ policy }} :::: Registering server'
+      ansible.builtin.shell:
+        cmd: "{{ host_registration.json.registration_command }}"
+      register: out
+      
+    - name: Notify Errors
+      ansible.builtin.debug:
+        var: out.stderr_lines
+      when: out.stderr_lines  | length > 0 
+
+    - name: Notify Stdout
+      ansible.builtin.debug:
+        var: out.stdout_lines
+      when: out.rc == 0
