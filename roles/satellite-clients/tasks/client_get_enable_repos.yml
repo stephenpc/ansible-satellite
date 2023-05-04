@@ -7,7 +7,7 @@
   register: enable_repos_id
 
 - set_fact:
-    enable_repos: "{{ enable_repos_id.stdout_lines | regex_replace('Repo ID: ', '') }}"
+    enable_repos: "{{ enable_repos_id.stdout | regex_replace('Repo ID: ', '') }}"
 
 - set_fact:
     enable_repos_list: "{{ enable_repos.split('\n') | lower }}"
