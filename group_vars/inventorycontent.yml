@@ -1,7 +1,7 @@
 [satellite]
-rhs.lnx.demo.rd
+satellite.example.com
 
 [old_satellite]
-srv1.lnx.demo.rd
+satellite.example.com
 
-[servers]
+[nodes]

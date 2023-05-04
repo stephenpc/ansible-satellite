@@ -4,23 +4,4 @@ satellite.example.com
 [old_satellite]
 satellite.example.com
 
-[puppet_master]
-satellite.example.com
-
-[puppet_ca]
-satellite.example.com
-
-[satellite6-server-prod]
-node.example.com
-
-[6RedHatEnterpriseServer:vars]
-activationkey='server,6epel'
-
-[6RedHatEnterpriseWorkstation:vars]
-activationkey='workstation,6epel'
-
-[7RedHatEnterpriseServer:vars]
-activationkey='server,7epel'
-
-[7RedHatEnterpriseWorkstation:vars]
-activationkey='workstation,7epel'
+[nodes]

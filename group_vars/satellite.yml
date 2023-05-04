@@ -1,11 +1,10 @@
 ---
 # ansible-satellite group vars
-
-initial_loc: "MX"
-initial_user: "admin"
-sat_admin_email: "psehgaft@redhat.com"
-sat_admin_firstname: "Admin"
-sat_admin_lastname: "RedHat"
+initial_loc: ""
+initial_user: ""
+sat_admin_email: ""
+sat_admin_firstname: ""
+sat_admin_lastname: ""
 
 # Place the file with this name in the roles/satellite-setup/files folder
 sat_manifest: "manifest.zip"
