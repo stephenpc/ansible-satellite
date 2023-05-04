@@ -15,10 +15,11 @@
       include_tasks: roles/satellite-clients/tasks/client_get_enable_repos.yml
     
     - name: Copy a new "ntp.conf" file into place, backing up the original if it differs from the copied version
-      ansible.builtin.copy:
+      copy:
         src: "/redhat.repo/redhat.repo"
         dest: "/redhat.repo/redhat.repo.{{ ansible_date_time.date }}"
         backup: yes
+        remote_src: yes
 
     - name: ":::: Unregister host ::::"
       include_tasks: ./roles/satellite-clients/tasks/client_unsubscribe.yml
