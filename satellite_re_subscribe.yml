@@ -32,7 +32,10 @@
       include_tasks: ./roles/satellite-content/tasks/get_activation_keys_for_org.yml
       with_items: "{{ inventory_satellite }}"
       vars:
-        organization: "{{ item.organization }}"
+          organization: "{{ item.organization }}"
+          host: ""
+          activationkey: ""
+          repos: ""
 
     - set_fact: 
         inventory_satellite: "{{ inventory_content }}"

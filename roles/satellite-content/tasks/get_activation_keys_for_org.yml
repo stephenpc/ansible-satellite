@@ -6,6 +6,9 @@
 - name: ":::: Get Activation Keys for Organization ::::"
   include_tasks: ./get_activation_keys.yml
 
+- debug:
+    msg: "{{ activation_keys_list }}"
+
 - name: ":::: Create content inventory ::::"
   include_tasks: ./create_content_inventory.yml
   with_subelements: 
