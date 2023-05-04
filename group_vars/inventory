@@ -8,3 +8,5 @@ rhs.lnx.demo.rd
 #3.144.121.168
 student1.twsfd.example.opentlc.com
 
+# [localhost]
+# localhost ansible_connection=ssh ansible_user=redhat ansible_ssh_pass=L3b1r4m4r1@#

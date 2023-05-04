@@ -50,6 +50,8 @@
       include_tasks: ./roles/satellite-content/tasks/create_content_inventory_file.yml 
       vars:
         inventory_content: "{{ inventory_satellite }}"
+        ansible_user: "mahernan" 
+        ansible_ssh_pass: "L3b1r4m4r1@#"
 
 - hosts: satellite6-server-prod
   become: yes
