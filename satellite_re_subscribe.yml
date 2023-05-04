@@ -1,5 +1,5 @@
 ---
-- hosts: all
+- hosts: servers
   become: yes
   vars_files:
     - group_vars/satellite.yml
