@@ -9,9 +9,12 @@
 - debug:
     msg: "{{ activation_keys_list }}"
 
+- debug:
+    msg: "{{ activation_keys_list.list }}"
+
 - name: ":::: Create content inventory ::::"
   include_tasks: ./create_content_inventory.yml
-  with_items: "{{ activation_keys_list.list[] }}"
+  with_items: "{{ activation_keys_list.list }}"
   vars:
     node:
       organization: "{{ activation_keys_list.org }}"
