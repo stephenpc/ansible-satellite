@@ -3,3 +3,4 @@
 - name: create inventory file
   copy: content="{{ inventory_content }}" dest=/group_vars/inventory_content.yml
   delegate_to: localhost
+  connection: local
