@@ -1,7 +1,8 @@
 ---
 # tasks file for satellite-clients
 - name: create inventory file
-  copy: content="{{ inventory_content }}" 
+  copy: 
+    content: "{{ inventory_content | to_yaml }}" 
     dest: "{{ path_vars }}/inventory_content.yml"
   delegate_to: localhost
   connection: local
