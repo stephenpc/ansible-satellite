@@ -11,16 +11,13 @@
 
 - name: ":::: Create content inventory ::::"
   include_tasks: ./create_content_inventory.yml
-  with_subelements: 
-    - "{{ item }}"
-    - "{{ activation_keys_list }}"
+  with_subelements: "{{ activation_keys_list }}"
   vars:
     node:
-      organization: "{{ item.0.organization }}"
-      host: "{{ item.1 }}"
-      activationkey: "{{ item.0.activation_key }}"
-      repos: "{{ item.0.repos_host }}"
-
+      organization: "{{ organization }}"
+      host: ""
+      activationkey: "{{ item }}"
+      repos: ""
   when: activation_keys_list is defined and (activation_keys_list|length>0)
 
     
