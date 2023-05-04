@@ -29,9 +29,12 @@
       include_tasks: ./roles/satellite-clients/tasks/client_unsubscribe.yml
       vars:
         satellite: "{{ groups['satellite'][0] }}"
-        activationkey: "{{ groups[ak] }}"
 
-    - name: ":::: Enable repos ::::"
-      rhsm_repository:
-        name: "{{ enable_repos_list }}"
-        state: enabled
+    - name: ":::: Register repos ::::"
+      include_tasks: ./roles/satellite-clients/tasks/client_enable_repo.yml
+      vars:
+        repo: "{{ item }}"
+      with_items: "{{ enable_repos_list }}"
+
+
+

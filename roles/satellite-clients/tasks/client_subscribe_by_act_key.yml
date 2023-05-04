@@ -5,7 +5,7 @@
   shell: "/usr/bin/yum localinstall -e 0 -y http://{{ groups['satellite'][0] }}/pub/katello-ca-consumer-latest.noarch.rpm"
   
 - name: Subscribe to Satellite
-  shell: "/usr/bin/subscription-manager register --org={{ org }} --activationkey={{ activationkey }}"
+  shell: "/usr/bin/subscription-manager register --org={{ organization }} --activationkey={{ activationkey }}"
   register: subscription_result
 #  ignore_errors: True
 

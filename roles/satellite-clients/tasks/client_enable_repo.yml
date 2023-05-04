@@ -1,0 +1,9 @@
+---
+# tasks file for satellite-clients
+
+- name: Get current subscription repositories
+  shell: 
+    cmd: subscription-manager repos --enable="{{ repo }}"
+  register: enable_repo
+
+
