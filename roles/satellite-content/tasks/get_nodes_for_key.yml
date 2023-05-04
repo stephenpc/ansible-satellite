@@ -22,14 +22,11 @@
     host_for_key_list_title: "{{ host_for_key_list_lines|reject('search', title)|list }}"
 
 - set_fact:
-    host_for_key_list: "{{ host_for_key_list_title }}"
+    host_for_key_list: 
+      - list: "{{ host_for_key_list_title }}"
+        org: "{{ organization }}"
+        ak: "{{ activation_key }}"
 
-- name: Create report
-  include_tasks: ./create_content_inventory.yml
-  with_items: "{{ host_for_key_list }}"
-  vars:
-    host_name: "{{ item }}"
-  when: host_for_key_list is defined and (host_for_key_list|length>0)
 
 
     

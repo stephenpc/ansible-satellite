@@ -5,6 +5,17 @@
 - name: ":::: Get Host and Key subscriptions ::::"
   include_tasks: ./get_nodes_for_key.yml
 
+- debug:
+    msg: "{{ host_for_key_list }}"
 
+- name: ":::: Create content inventory ::::"
+  include_tasks: ./create_content_inventory.yml
+  with_items: "{{ host_for_key_list[0].list }}"
+  vars:
+    node:
+      organization: "{{ host_for_key_list[0].org }}"
+      activationkey: "{{ host_for_key_list[0].ak }}"
+      host: "{{ item }}"
+  when: host_for_key_list[0].list is defined and ( host_for_key_list[0].list|length>0 )
 
     
