@@ -19,7 +19,7 @@
       with_items: "{{ organizations_list }}"
       vars:
         node:
-          organization: "{{ item|upper }}"
+          organization: "{{ item }}"
 
     - set_fact: 
         inventory_satellite: "{{ inventory_content }}"
@@ -50,9 +50,9 @@
       include_tasks: ./roles/satellite-content/tasks/create_content_inventory_file.yml 
       vars:
         inventory_content: "{{ inventory_satellite }}"
-        ansible_user: "mahernan" 
-        ansible_ssh_pass: "L3b1r4m4r1@#"
-        ansible_sudo_pass: "L3b1r4m4r1@#"
+#        ansible_user: "redhat" 
+#        ansible_ssh_pass: "redhat123"
+#        ansible_sudo_pass: "redhat123"
       with_items: "{{ inventory_satellite }}"
 
 - hosts: localhost

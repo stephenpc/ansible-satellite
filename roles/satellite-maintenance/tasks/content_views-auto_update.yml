@@ -10,7 +10,7 @@
     body_format: json
     method: GET
     user: admin
-    password: "{{ sat_admin_password }}"
+    password: "{{ rhn_pass }}"
     status_code: [ 200, 201 ]
     url: "https://{{ satellite_server }}/katello/api/v2/content_views?per_page=5000"
     validate_certs: no
@@ -25,7 +25,7 @@
     body_format: json
     method: GET
     user: admin
-    password: "{{ sat_admin_password }}"
+    password: "{{ rhn_pass }}"
     status_code: [ 200, 201 ]
     url: "https://{{ satellite_server }}/katello/api/v2/content_views/{{ item.id }}/filters"
     validate_certs: no
@@ -66,7 +66,7 @@
     body_format: json
     method: DELETE
     user: admin
-    password: "{{ sat_admin_password }}"
+    password: "{{ rhn_pass }}"
     status_code: [ 200, 201, 204 ]
     url: "https://{{ satellite_server }}/katello/api/v2/content_views/{{ item.viewid }}/filters/{{ item.filterid }}"
     validate_certs: no

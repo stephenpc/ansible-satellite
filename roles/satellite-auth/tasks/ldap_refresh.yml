@@ -9,7 +9,7 @@
     body_format: json
     method: GET
     user: admin
-    password: "{{ sat_admin_password }}"
+    password: "{{ rhn_pass }}"
     status_code: [ 200, 201 ]
     url: "https://{{ satellite_server }}/api/v2/users"
     validate_certs: no
@@ -24,7 +24,7 @@
     body_format: json
     method: GET
     user: admin
-    password: "{{ sat_admin_password }}"
+    password: "{{ rhn_pass }}"
     status_code: [ 200, 201 ]
     url: "https://{{ satellite_server }}/api/v2/usergroups"
     validate_certs: no
@@ -39,7 +39,7 @@
     body_format: json
     method: GET
     user: admin
-    password: "{{ sat_admin_password }}"
+    password: "{{ rhn_pass }}"
     status_code: [ 200, 201 ]
     url: "https://{{ satellite_server }}/api/v2/usergroups/{{ item.name }}"
     validate_certs: no

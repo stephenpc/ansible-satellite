@@ -1,8 +1,7 @@
-[servers]
-srv1.lnx.demo.rd organization=RD  activationkey=aap_ak 
-
 [satellite]
 rhs.lnx.demo.rd
 
 [old_satellite]
 srv1.lnx.demo.rd
+
+[servers]

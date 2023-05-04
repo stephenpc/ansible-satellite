@@ -10,8 +10,8 @@
     enable_repos: "{{ enable_repos_id.stdout | regex_replace('Repo ID: ', '') }}"
 
 - set_fact:
-    enable_repos: "{{ enable_repos_id.stdout | regex_replace(' ', '') }}"
+    enable_repos: "{{ enable_repos_id.stdout | rejectattr('')  }}"
 
 - set_fact:
-    enable_repos_list: "{{ enable_repos.split('\n') | lower }}"
+    enable_repos_list: "{{ enable_repos.split('\n') }}"
 

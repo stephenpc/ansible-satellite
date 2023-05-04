@@ -14,7 +14,7 @@
       prompt: "Enter your username. (Required, defaults to admin)"
       default: "admin"
       private: no
-    - name: "sat_admin_password"
+    - name: "rhn_pass"
       prompt: "Enter your password. (Required)"
       private: yes
     - name: "satellite_organization_id"
@@ -33,7 +33,7 @@
         body_format: json
         method: GET
         user: "{{ sat_admin_user }}"
-        password: "{{ sat_admin_password }}"
+        password: "{{ rhn_pass }}"
         status_code: [ 200, 201 ]
         url: "https://{{ satellite_server }}/katello/api/systems?organization_id={{ satellite_organization_id | default(1) }}&per_page=5000"
         validate_certs: no
@@ -52,7 +52,7 @@
         body_format: json
         method: DELETE
         user: "{{ sat_admin_user }}"
-        password: "{{ sat_admin_password }}"
+        password: "{{ rhn_pass }}"
         status_code: [ 200, 201, 204 ]
         url: "https://{{ satellite_server }}/katello/api/systems/{{ item.uuid }}"
         validate_certs: no
