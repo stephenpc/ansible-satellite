@@ -5,4 +5,4 @@ aap.lnx.demo.rd organization=RD   activationkey=aap_ak
 rhs.lnx.demo.rd
 
 [old_satellite]
-rhs.lnx.demo.rd
+srv1.lnx.demo.rd
