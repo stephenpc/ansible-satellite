@@ -8,7 +8,7 @@
 
 - name: Get current subscription repositories
   shell: 
-    cmd: echo "{{ enable_repos.stdout }}" | awk -F '"' '{print $2}'
+    cmd: echo "{{ enable_repos.stdout_lines }}" | awk -F '"' '{print $2}'
   register: enable_repos
 
 - debug:
