@@ -1,11 +1,16 @@
 ---
 # tasks file for satellite-clients
 
-- name: Clean old subscription-manager data
+- name: Get current subscription repositories
   shell: 
-    cmd: subscription-manager repos --list-enabled
+    - cmd: subscription-manager repos --list-enabled | grep -i 'Repo ID'
+  register: enable_repos_id
+
+- name: Get current subscription repositories
+  shell: 
+    cmd: echo "{{ enable_repos.stdout }}" | awk -F '"' '{print $2}'
   register: enable_repos
 
 - debug:
-    msg: "{{ enable_repos..stdout.split('\n') | lower }}"
+    msg: "{{ enable_repos.stdout.split('\n') | lower }}"
 
