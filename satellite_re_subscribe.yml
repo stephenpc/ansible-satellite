@@ -32,6 +32,6 @@
         activationkey: "{{ groups[ak] }}"
 
     - name: ":::: Enable repos ::::"
-      community.general.rhsm_repository:
+      rhsm_repository:
         name: "{{ enable_repos_list }}"
         state: enabled
