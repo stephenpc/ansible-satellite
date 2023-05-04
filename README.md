@@ -11,7 +11,7 @@ Reference [standup.yml](standup.yml), which is the installation playbook, to see
 ### **ansible-satellite roles:**
 _The following roles are called by several playbooks to orchestrate tasks on the Satellite server. Please review the playbooks to see how these come together to work._
 
-1. [create_inventory](#create_inventory)
+1. [satellite-clients](#create-clients-tools-for-register)
 1. [satellite-auth](#satellite-authentication-satellite-auth)
 1. [satellite-content](#satellite-content-satellite-content)
 1. [satellite-install](#satellite-installation-satellite-install)
@@ -40,14 +40,13 @@ _These scripts are written to aid in refreshing subscriptions on all the hosts, 
 1. [bash-refresh_subscriptions.sh](#bash-refresh_subscriptionssh)
 1. [bash-recreate_subscriptions.sh](#bash-recreate_subscriptionssh)
 
----
-
-# Roles
-
 ### Configure Playbook
-Copy the hosts.template file and fill it out with information for your infrastructure. Add systems to [nodes] for hosts you want tasks to run on.
+Copy the inventory.template file and fill it out with information for your infrastructure. Add systems to [nodes] for hosts you want tasks to run on.
 
-```[satellite]
+or create a current host inventory on */goup_vars/inventorycontent.yml*
+
+```inventorycontext.yml
+[satellite]
 satellite.example.com
 
 [old_satellite]
@@ -59,15 +58,17 @@ satellite.example.com
 [puppet_ca]
 satellite.example.com
 
-[nodes]
-node1.example.com
-node2.example.com
- 
 [6RedHatEnterpriseServer:vars]
 activationkey='server,6epel'
 
 [7RedHatEnterpriseServec:vars]
 activationkey='workstation,6epel'
+
+[nodes]
+node1.example.com activationkey= organization=  
+node2.example.com activationkey= organization=
+ 
+
 ```
 Use activation keys to register the hosts so make sure your activation keys are set up in satellite before running.
 
@@ -77,17 +78,29 @@ Enable the satellite settings create_new_host_when_facts_are_uploaded and create
 
 To run on all of your nodes (defined in hosts) make sure you update the activationkey variables (in hosts) and then use.
 
-`ansible-playbook -i inventory satellite-playbook.yaml`
+`ansible-playbook -i inventorycontext.yml satellite-playbook.yaml`
 
 Add `-k` (ssh) or `-K` (sudo) if you need password prompts.
 
 You can also run just the puppet registration tasks with
 
-`ansible-playbook -i inventory satellite-playbook.yaml --tags puppet`
+`ansible-playbook -i inventorycontext.yml satellite-playbook.yaml --tags puppet`
 
 After the tasks complete you should have new unmanaged hosts in satellite. Edit the host and add any configuration you need (host groups, network, puppet). Unfortunately, I could not find a way to automate those steps yet. Your best bet is probably [hammer](https://github.com/theforeman/hammer-cli).
 
 Once the hosts have been moved you may need to reinstall the katello-agent. Do that with `ansible all -i hosts -m yum -a "state=absent name=katello-agent"` and then `ansible all -i hosts -m yum -a "state=present name=katello-agent"`
+
+NOTE: For create a Satellite inventory from de old-satellite in a Satellite migration you need to use:
+
+`ansible-playbook -i inventorycontext.yml create_inventory.yml`
+
+For resubscribe nodes in a new satellite based in your inventory context elments
+
+`ansible-playbook -i inventorycontext.yml satellite_re_subscribe.yml`
+
+---
+
+# Roles
 
 ## Satellite Authentication (**satellite-auth**)
 _This role sets up the Satellite Server with authenticated local users, or ties it into a central LDAP server for authentication._
@@ -109,12 +122,22 @@ Invoke the role in the following way. Please note the configuration values speci
       # ldap_refresh: yes
 ```
 
-## Ansible Satellite create inventory (**satellite-inventory**)
+## Ansible Satellite Clients (**satellite-clients**)
+_This role include tools for subscribe and unsubscribe nodes on your satellite.
 
-## Ansible Satellite Transition (**satellite-transition**)
-This playbook will move nodes registered in one Satellite host to another. *It will not install satellite/katello server for you.* Use this after you have set up a new Satellite server and want to move all your existing nodes from one server to another.
+nvoke the role/tasks in the following way. Please note the configuration values specified in [roles/satellite-content/vars/main.yml](roles/satellite-content/vars/main.yml), [satellite.yml](group_vars/satellite.yml) and [secrets.yml](group_vars/secrets.yml).
 
-#
+```yaml
+---
+- hosts: satellite6-server-prod
+  become: yes
+  vars_files:
+    - group_vars/satellite.yml
+    - group_vars/secrets.yml
+  gather_facts: yes
+  tasks:
+    - include_tasks: ./roles/satellite-clients/tasks/[task].yml
+```
 
 ## Satellite Content (**satellite-content**)
 _This role creates lifecycle environments on the Satellite Server, creates content views and filters them, then sets up activation keys pointing to each, and a release version with wich to activate RHEL systems._
