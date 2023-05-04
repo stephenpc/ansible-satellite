@@ -8,7 +8,7 @@
   register: host_for_key 
 
 - set_fact:
-    host_for_key_list: "{{  host_for_key.stdout.split('\n') | regex_replace(' ', '') }}"
+    host_for_key_list: "{{  host_for_key.stdout.split('\n') | | regex_replace('[ \f\t\v]+$', '') }}"
 
 - set_fact:
     separators: "{{ host_for_key_list[0] }}"

@@ -8,7 +8,7 @@
   register: activation_keys
 
 - set_fact:
-    activation_keys_list: "{{  activation_keys.stdout.split('\n') | regex_replace(' ', '') }}"
+    activation_keys_list: "{{  activation_keys.stdout.split('\n') | | regex_replace('[ \f\t\v]+$', '') }}"
 
 - set_fact:
     separators: "{{ activation_keys_list[0] }}"
