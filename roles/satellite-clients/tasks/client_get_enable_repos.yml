@@ -6,3 +6,6 @@
     cmd: subscription-manager repos --list-enabled
   register: enable_repos
 
+- debug:
+    msg: "{{ enable_repos..stdout.split('\n') | lower }}"
+

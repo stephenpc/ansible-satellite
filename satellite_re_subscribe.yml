@@ -17,13 +17,13 @@
     - name: ":::: Get repos for host ::::"
       include_tasks: roles/satellite-clients/tasks/client_get_enable_repos.yml
 
-    - name: ":::: Unregister host ::::"
-      include_tasks: ./roles/satellite-clients/tasks/client_unsubscribe.yml
-      vars:
-        satellite: "{{ groups['old_satellite'][0] }}"
+#    - name: ":::: Unregister host ::::"
+#      include_tasks: ./roles/satellite-clients/tasks/client_unsubscribe.yml
+#      vars:
+#        satellite: "{{ groups['old_satellite'][0] }}"
     
-    - name: ":::: Register host ::::"
-      include_tasks: ./roles/satellite-clients/tasks/client_unsubscribe.yml
-      vars:
-        satellite: "{{ groups['satellite'][0] }}"
-        activationkey: "{{ groups[ak] }}"
+#    - name: ":::: Register host ::::"
+#      include_tasks: ./roles/satellite-clients/tasks/client_unsubscribe.yml
+#      vars:
+#        satellite: "{{ groups['satellite'][0] }}"
+#        activationkey: "{{ groups[ak] }}"
