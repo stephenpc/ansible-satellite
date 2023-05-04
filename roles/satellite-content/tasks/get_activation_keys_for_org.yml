@@ -14,8 +14,8 @@
   with_items: "{{ activation_keys_list[0].list }}"
   vars:
     node:
-      organization: "{{ activation_keys_list[0].org }}"
-      activationkey: "{{ item }}"
+      - organization: "{{ activation_keys_list[0].org }}"
+      - activationkey: "{{ item }}"
   when: activation_keys_list[0].list is defined and ( activation_keys_list[0].list|length>0 )
 
     

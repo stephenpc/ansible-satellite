@@ -13,9 +13,9 @@
   with_items: "{{ host_for_key_list[0].list }}"
   vars:
     node:
-      organization: "{{ host_for_key_list[0].org }}"
-      activationkey: "{{ host_for_key_list[0].ak }}"
-      host: "{{ item }}"
+      - organization: "{{ host_for_key_list[0].org }}"
+      - activationkey: "{{ host_for_key_list[0].ak }}"
+      - host: "{{ item }}"
   when: host_for_key_list[0].list is defined and ( host_for_key_list[0].list|length>0 )
 
     
