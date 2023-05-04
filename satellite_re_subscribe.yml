@@ -20,9 +20,6 @@
       vars:
         node:
           organization: "{{ item|upper }}"
-          host: ""
-          activationkey: ""
-          repos: ""
 
     - set_fact: 
         inventory_satellite: "{{ inventory_content }}"
@@ -33,9 +30,6 @@
       with_items: "{{ inventory_satellite }}"
       vars:
           organization: "{{ item.organization }}"
-          host: ""
-          activationkey: ""
-          repos: ""
 
     - set_fact: 
         inventory_satellite: "{{ inventory_content }}"
