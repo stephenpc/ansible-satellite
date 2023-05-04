@@ -7,7 +7,7 @@
   register: enable_repos_id
 
 - set_fact:
-    enable_repos: "{{ enable_repos.stdout | regex_replace('Repo ID', '') }}"
+    enable_repos: "{{ enable_repos_id.stdout | regex_replace('Repo ID', '') }}"
 
 - debug:
     msg: "{{ enable_repos.stdout.split('\n') | lower }}"
