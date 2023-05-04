@@ -53,12 +53,14 @@
         ansible_user: "mahernan" 
         ansible_ssh_pass: "L3b1r4m4r1@#"
         ansible_sudo_pass: "L3b1r4m4r1@#"
+      with_items: "{{ inventory_satellite }}"
 
-- hosts: satellite6-server-prod
+- hosts: localhost
   become: yes
   vars_files:
     - group_vars/satellite.yml
     - group_vars/secrets.yml
+    - group_vars/inventory_content.yml
   gather_facts: yes
   
   tasks:
