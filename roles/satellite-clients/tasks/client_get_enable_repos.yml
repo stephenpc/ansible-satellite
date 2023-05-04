@@ -3,7 +3,7 @@
 
 - name: Get current subscription repositories
   shell: 
-    - cmd: subscription-manager repos --list-enabled | grep -i 'Repo ID'
+    cmd: subscription-manager repos --list-enabled | grep -i 'Repo ID'
   register: enable_repos_id
 
 - name: Get current subscription repositories
