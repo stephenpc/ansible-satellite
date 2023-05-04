@@ -11,7 +11,7 @@
 
 - name: ":::: Create content inventory ::::"
   include_tasks: ./create_content_inventory.yml
-  with_subelements: "{{ activation_keys_list }}"
+  with_items: "{{ activation_keys_list }}"
   vars:
     node:
       organization: "{{ organization }}"
