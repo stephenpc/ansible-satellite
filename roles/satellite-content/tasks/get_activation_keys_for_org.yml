@@ -9,11 +9,6 @@
 - debug:
     msg: "{{ activation_keys_list }}"
 
-- debug:
-    - msg: 
-        - "{{ activation_keys_list[0].list }}"
-        - "{{ activation_keys_list[1].org }}"
-
 - name: ":::: Create content inventory ::::"
   include_tasks: ./create_content_inventory.yml
   with_items: "{{ activation_keys_list[0].list }}"
