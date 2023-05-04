@@ -4,7 +4,7 @@
 - name: create inventory file
   lineinfile:
     path: "{{ path_vars }}/inventorycontent.yml"
-    line: "{{ item.node }} organization={{ organization }} activationkey={{ activationkey }}"
+    line: "{{ item.host }} organization={{ organization }} activationkey={{ activationkey }}"
     create: yes
   delegate_to: localhost
   connection: local
