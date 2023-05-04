@@ -11,6 +11,7 @@ Reference [standup.yml](standup.yml), which is the installation playbook, to see
 ### **ansible-satellite roles:**
 _The following roles are called by several playbooks to orchestrate tasks on the Satellite server. Please review the playbooks to see how these come together to work._
 
+1. [create_inventory](#create_inventory)
 1. [satellite-auth](#satellite-authentication-satellite-auth)
 1. [satellite-content](#satellite-content-satellite-content)
 1. [satellite-install](#satellite-installation-satellite-install)
@@ -42,29 +43,6 @@ _These scripts are written to aid in refreshing subscriptions on all the hosts, 
 ---
 
 # Roles
-
-## Satellite Authentication (**satellite-auth**)
-_This role sets up the Satellite Server with authenticated local users, or ties it into a central LDAP server for authentication._
-
-Invoke the role in the following way. Please note the configuration values specified in [roles/satellite-auth/vars/main.yml](roles/satellite-auth/vars/main.yml), [satellite.yml](group_vars/satellite.yml) and [secrets.yml](group_vars/secrets.yml).
-
-```yaml
----
-- hosts: satellite6-server-prod
-  become: yes
-  vars_files:
-    - group_vars/satellite.yml
-    - group_vars/secrets.yml
-  gather_facts: yes
-      # satellite-auth | Define users and assign them roles
-    - role: satellite-auth
-      # local_users: yes
-      # ldap_users: yes
-      # ldap_refresh: yes
-```
-
-## Ansible Satellite Transition
-This playbook will move nodes registered in one Satellite host to another. *It will not install satellite/katello server for you.* Use this after you have set up a new Satellite server and want to move all your existing nodes from one server to another.
 
 ### Configure Playbook
 Copy the hosts.template file and fill it out with information for your infrastructure. Add systems to [nodes] for hosts you want tasks to run on.
@@ -111,6 +89,32 @@ After the tasks complete you should have new unmanaged hosts in satellite. Edit 
 
 Once the hosts have been moved you may need to reinstall the katello-agent. Do that with `ansible all -i hosts -m yum -a "state=absent name=katello-agent"` and then `ansible all -i hosts -m yum -a "state=present name=katello-agent"`
 
+## Satellite Authentication (**satellite-auth**)
+_This role sets up the Satellite Server with authenticated local users, or ties it into a central LDAP server for authentication._
+
+Invoke the role in the following way. Please note the configuration values specified in [roles/satellite-auth/vars/main.yml](roles/satellite-auth/vars/main.yml), [satellite.yml](group_vars/satellite.yml) and [secrets.yml](group_vars/secrets.yml).
+
+```yaml
+---
+- hosts: satellite6-server-prod
+  become: yes
+  vars_files:
+    - group_vars/satellite.yml
+    - group_vars/secrets.yml
+  gather_facts: yes
+      # satellite-auth | Define users and assign them roles
+    - role: satellite-auth
+      # local_users: yes
+      # ldap_users: yes
+      # ldap_refresh: yes
+```
+
+## Ansible Satellite create inventory (**satellite-inventory**)
+
+## Ansible Satellite Transition (**satellite-transition**)
+This playbook will move nodes registered in one Satellite host to another. *It will not install satellite/katello server for you.* Use this after you have set up a new Satellite server and want to move all your existing nodes from one server to another.
+
+#
 
 ## Satellite Content (**satellite-content**)
 _This role creates lifecycle environments on the Satellite Server, creates content views and filters them, then sets up activation keys pointing to each, and a release version with wich to activate RHEL systems._
