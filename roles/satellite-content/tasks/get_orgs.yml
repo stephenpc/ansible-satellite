@@ -8,7 +8,7 @@
   register: organizations
 
 - set_fact:
-    organizations_list: "{{  organizations.stdout.split('\n') |rejectattr('') }}"
+    organizations_list: "{{  organizations.stdout.split('\n') | regex_replace(' ', '')}}"
 
 - set_fact:
     separators: "{{ organizations_list[0] }}"
