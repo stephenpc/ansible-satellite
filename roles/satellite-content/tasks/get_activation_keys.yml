@@ -22,7 +22,9 @@
     activation_keys_list_remove_title: "{{ activation_keys_list_remove_lines|reject('search', title)|list }}"
 
 - set_fact:
-    activation_keys_list: "{{ activation_keys_list_remove_title }}"
+    activation_keys_list: 
+      - list: "{{ activation_keys_list_remove_title }}"
+        org: "{{ organization }}"
 
 
 

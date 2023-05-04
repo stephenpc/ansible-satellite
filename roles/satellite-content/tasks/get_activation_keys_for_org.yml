@@ -11,10 +11,10 @@
 
 - name: ":::: Create content inventory ::::"
   include_tasks: ./create_content_inventory.yml
-  with_items: "{{ activation_keys_list }}"
+  with_items: "{{ activation_keys_list.list }}"
   vars:
     node:
-      organization: "{{ organization }}"
+      organization: "{{ activation_keys_list.org }}"
       activationkey: "{{ item }}"
   when: activation_keys_list is defined and (activation_keys_list|length>0)
 
