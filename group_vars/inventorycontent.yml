@@ -1,5 +1,5 @@
 [servers]
-aap.lnx.demo.rd organization=RD   activationkey=aap_ak 
+srv1.lnx.demo.rd organization=RD   activationkey=aap_ak 
 
 [satellite]
 rhs.lnx.demo.rd
