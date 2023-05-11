@@ -18,4 +18,14 @@
       host: "{{ item }}"
   when: host_for_key_list[0].list is defined and ( host_for_key_list[0].list|length>0 )
 
+- name: create inventory file
+  lineinfile:
+    path: "{{ path_vars }}/inventorycontent{{ ansible_date_time.date }}.yml"
+    line: "{{ item }} organization={{ host_for_key_list[0].org }} activationkey={{ host_for_key_list[0].ak }}"
+    create: yes
+  with_items: "{{ host_for_key_list[0].list }}"
+  when: host_for_key_list[0].list is defined and ( host_for_key_list[0].list|length>0 )
+  delegate_to: localhost
+  connection: local
+
     

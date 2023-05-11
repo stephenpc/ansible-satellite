@@ -5,3 +5,4 @@ satellite.example.com
 satellite.example.com
 
 [nodes]
+#  host.example.com organization=EXAMPLE activationkey=rhel_activation_key"

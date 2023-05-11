@@ -50,9 +50,6 @@
       include_tasks: ./roles/satellite-content/tasks/create_content_inventory_file.yml 
       vars:
         inventory_content: "{{ inventory_satellite }}"
-#        ansible_user: "redhat" 
-#        ansible_ssh_pass: "redhat123"
-#        ansible_sudo_pass: "redhat123"
       with_items: "{{ inventory_satellite }}"
 
 - hosts: localhost

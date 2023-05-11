@@ -68,7 +68,14 @@ activationkey='workstation,6epel'
 node1.example.com activationkey= organization=  
 node2.example.com activationkey= organization=
  
+[satellite]
+satellite.example.com
 
+[old_satellite]
+satellite.example.com
+
+#[nodes]
+#  host.example.com organization=EXAMPLE activationkey=rhel_activation_key"
 ```
 Use activation keys to register the hosts so make sure your activation keys are set up in satellite before running.
 

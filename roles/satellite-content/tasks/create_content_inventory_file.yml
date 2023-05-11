@@ -3,7 +3,7 @@
 
 - name: create inventory file
   lineinfile:
-    path: "{{ path_vars }}/inventorycontent.yml"
+    path: "{{ path_vars }}/inventorycontent-{{ ansible_date_time.date }}.yml"
     line: "{{ item.host }} organization={{ item.organization }} activationkey={{ item.activationkey }}"
     create: yes
   delegate_to: localhost
@@ -12,7 +12,7 @@
 - name: create inventory file
   copy: 
     content: "{{ item | to_yaml }}" 
-    dest: "{{ path_vars }}/inventory_content.yml"
+    dest: "{{ path_vars }}/inventorycontent-{{ ansible_date_time.date }}.json"
   delegate_to: localhost
   connection: local
   

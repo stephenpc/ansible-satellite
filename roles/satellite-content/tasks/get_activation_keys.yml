@@ -4,7 +4,7 @@
   # Get all activation Keys
 - name: Get list of all activation keys
   shell:
-    cmd: 'hammer activation-key list --organization {{ organization }} --fields name'
+    cmd: 'hammer activation-key list --organization "{{ organization }}" --fields name'
   register: activation_keys
 
 - set_fact:
