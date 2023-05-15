@@ -1,0 +1,15 @@
+---
+# tasks file for satellite-clients
+
+- name: Install new satellite certs
+  shell: "/usr/bin/yum localinstall -e 0 -y http://{{ groups['satellite'][0] }}/pub/katello-ca-consumer-latest.noarch.rpm"
+  
+- name: Subscribe to Satellite
+  shell: "/usr/bin/subscription-manager register --org={{ organization }} --activationkey={{ activationkey }}"
+  register: subscription_result
+#  ignore_errors: True
+
+# sometimes nodes fail to unregister
+#- name: Force subscribe
+#  shell: "/usr/bin/subscription-manager register --force --org {{ org_id }} --activationkey={{ activationkey }}"
+#  when: "'Use --force' in subscription_result.stdout"

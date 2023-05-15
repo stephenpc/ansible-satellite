@@ -1,0 +1,10 @@
+---
+# tasks file for satellite-clients
+# node:  
+#   organization: "{{ organization }}"
+#   host: "{{ host }}"
+#   activationkey: "{{ activationkey }}"
+#   repos: "{{ repos }}"
+
+- set_fact:
+    inventory_content: "{{ inventory_content +  [node] }}"

@@ -1,0 +1,41 @@
+---
+- hosts: servers
+  become: yes
+  vars_files:
+    - group_vars/satellite.yml
+    - group_vars/secrets.yml
+  gather_facts: yes
+  
+  tasks:
+# create dynamic groups to define variables
+#    - group_by: 
+#        key: "{{ ansible_distribution }}-{{ ansible_distribution_version | truncate(1, True, '') }}"
+
+    - name: ":::: Get repos for host ::::"
+      include_tasks: roles/satellite-clients/tasks/client_get_enable_repos.yml
+    
+    - name: Copy a new "ntp.conf" file into place, backing up the original if it differs from the copied version
+      copy:
+        src: "/etc/yum.repos.d/redhat.repo"
+        dest: "/etc/yum.repos.d/redhat.repo.{{ ansible_date_time.date }}"
+        backup: yes
+        remote_src: yes
+
+    - name: ":::: Unregister host ::::"
+      include_tasks: ./roles/satellite-clients/tasks/client_unsubscribe.yml
+      vars:
+        satellite: "{{ groups['old_satellite'][0] }}"
+    
+    - name: ":::: Register host ::::"
+      include_tasks: ./roles/satellite-clients/tasks/client_unsubscribe.yml
+      vars:
+        satellite: "{{ groups['satellite'][0] }}"
+
+    - name: ":::: Register repos ::::"
+      include_tasks: ./roles/satellite-clients/tasks/client_enable_repo.yml
+      vars:
+        repo: "{{ item }}"
+      with_items: "{{ enable_repos_list }}"
+
+
+

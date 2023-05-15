@@ -1,0 +1,7 @@
+[satellite]
+satellite.example.com
+
+[old_satellite]
+satellite.example.com
+
+[nodes]

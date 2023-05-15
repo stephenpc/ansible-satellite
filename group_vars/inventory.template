@@ -1,0 +1,8 @@
+[satellite]
+satellite.example.com
+
+[old_satellite]
+satellite.example.com
+
+[nodes]
+#  host.example.com organization=EXAMPLE activationkey=rhel_activation_key"

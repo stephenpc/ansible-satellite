@@ -1,0 +1,16 @@
+---
+# tasks file for satellite-clients
+
+- name: Unregister host
+  redhat_subscription: 
+    state: absent
+  ignore_errors: True
+  
+- name: Clean old subscription-manager data
+  shell: 
+    cmd: subscription-manager clean
+
+- name: Remove old satellite certs
+  yum: 
+    name: "katello-ca-consumer-{{ satellite }}"
+    state: absent

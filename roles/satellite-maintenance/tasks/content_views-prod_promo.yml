@@ -9,7 +9,7 @@
     body_format: json
     method: GET
     user: admin
-    password: "{{ sat_admin_password }}"
+    password: "{{ rhn_pass }}"
     status_code: [ 200, 201 ]
     url: "https://{{ satellite_server }}/katello/api/v2/content_views?per_page=5000"
     validate_certs: no

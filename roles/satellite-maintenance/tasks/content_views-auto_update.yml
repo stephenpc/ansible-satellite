@@ -10,7 +10,7 @@
     body_format: json
     method: GET
     user: admin
-    password: "{{ sat_admin_password }}"
+    password: "{{ rhn_pass }}"
     status_code: [ 200, 201 ]
     url: "https://{{ satellite_server }}/katello/api/v2/content_views?per_page=5000"
     validate_certs: no
@@ -25,7 +25,7 @@
     body_format: json
     method: GET
     user: admin
-    password: "{{ sat_admin_password }}"
+    password: "{{ rhn_pass }}"
     status_code: [ 200, 201 ]
     url: "https://{{ satellite_server }}/katello/api/v2/content_views/{{ item.id }}/filters"
     validate_certs: no
@@ -66,7 +66,7 @@
     body_format: json
     method: DELETE
     user: admin
-    password: "{{ sat_admin_password }}"
+    password: "{{ rhn_pass }}"
     status_code: [ 200, 201, 204 ]
     url: "https://{{ satellite_server }}/katello/api/v2/content_views/{{ item.viewid }}/filters/{{ item.filterid }}"
     validate_certs: no
@@ -80,7 +80,7 @@
 - name: Creating content view package filter(s)
   command: >
     /bin/hammer content-view filter create
-    --organization "{{ initial_org }}"
+    --organization "{{ organization }}"
     --name "{{ item.name }}"
     --content-view "{{ item.content_view_name }}"
     --inclusion "{{ item.is_inclusion }}"
@@ -99,7 +99,7 @@
 - name: Add content filter rules by package
   command: >
     /bin/hammer content-view filter rule create
-    --organization "{{ initial_org }}"
+    --organization "{{ organization }}"
     --name "{{ item.1.name }}"
     --content-view "{{ item.0.content_view_name }}"
     --content-view-filter "{{ item.0.name }}"
@@ -119,7 +119,7 @@
 - name: Applying repository restrictions to package filters
   command: >
     /bin/hammer content-view filter update
-    --organization "{{ initial_org }}"
+    --organization "{{ organization }}"
     --name "{{ item.name }}"
     --content-view "{{ item.content_view_name }}"
     --repository-ids "{{ item.repositories | join(',') }}"
@@ -137,7 +137,7 @@
 - name: Creating content view erratum filters using date exclusion
   command: >
     /bin/hammer content-view filter create
-    --organization "{{ initial_org }}"
+    --organization "{{ organization }}"
     --name "{{ item.name | replace('-cv','') }}-dated_to_{{ ansible_date_time.month }}{{ ansible_date_time.day }}{{ ansible_date_time.year }}"
     --content-view "{{ item.name }}"
     --inclusion "{{ sat_content_orchestration.date_filters.inclusion }}"
@@ -157,7 +157,7 @@
 - name: Exclude erratum updated after todays date
   command: >
     /bin/hammer content-view filter rule create
-    --organization "{{ initial_org }}"
+    --organization "{{ organization }}"
     --content-view "{{ item.name }}"
     --content-view-filter "{{ item.name | replace('-cv','') }}-dated_to_{{ ansible_date_time.month }}{{ ansible_date_time.day }}{{ ansible_date_time.year }}"
     --start-date "{{ sat_content_orchestration.date_filters.start_date }}"

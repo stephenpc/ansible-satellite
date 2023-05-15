@@ -6,7 +6,7 @@
     fail:
       msg: "You must pass an organization, location, username, and manifest to this role. Please see README.md for more detail."
     when: >
-      initial_org is not defined
+      organization is not defined
       or initial_loc is not defined
       or initial_user is not defined
       or sat_manifest is not defined
@@ -35,8 +35,8 @@
   - name: Create an initial organization
     command: >
       /bin/hammer organization create
-      --name "{{ initial_org }}"
-      --label "{{ initial_org }}"
+      --name "{{ organization }}"
+      --label "{{ organization }}"
     register: create_org
     failed_when: >
       create_org.rc != 0
@@ -47,7 +47,7 @@
   - name: Add a user to the organization
     command: >
       /bin/hammer organization add-user
-      --name "{{ initial_org }}"
+      --name "{{ organization }}"
       --user "{{ initial_user }}"
     register: org_adduser
     failed_when: >
@@ -83,7 +83,7 @@
     command: >
       /bin/hammer location add-organization
       --name "{{ initial_loc }}"
-      --organization "{{ initial_org }}"
+      --organization "{{ organization }}"
     register: loc_addorg
     failed_when: >
       loc_addorg.rc != 0
@@ -106,7 +106,7 @@
     command: >
       /bin/hammer subscription upload
       --file "{{ ansible_user_dir }}/{{ sat_manifest }}"
-      --organization "{{ initial_org }}"
+      --organization "{{ organization }}"
     register: manifest_upload
     failed_when: >
       manifest_upload.rc != 0
@@ -115,12 +115,12 @@
   - name: "Refresh the manifest with the latest copy from the Red Hat Portal"
     command: >
       /bin/hammer subscription refresh-manifest
-      --organization "{{ initial_org }}"
+      --organization "{{ organization }}"
 
   - name: Grab list of repositories available to this Satellite server
     command: >
       /bin/hammer product list
-      --organization "{{ initial_org }}"
+      --organization "{{ organization }}"
     changed_when: no
     register: hammer_product_list
 

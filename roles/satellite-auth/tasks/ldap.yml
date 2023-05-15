@@ -72,7 +72,7 @@
     body_format: json
     method: GET
     user: admin
-    password: "{{ sat_admin_password }}"
+    password: "{{ rhn_pass }}"
     status_code: [ 200, 201 ]
     url: "https://{{ satellite_server }}/api/v2/auth_source_ldaps/{{ item.name }}"
     validate_certs: no

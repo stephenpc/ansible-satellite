@@ -5,7 +5,7 @@
   - name: Creating activation key(s)
     command: >
       /bin/hammer activation-key create
-      --organization "{{ initial_org }}"
+      --organization "{{ organization }}"
       --name "{{ item.name }}"
       --content-view "{{ item.content_view }}"
       --lifecycle-environment "{{ item.lifecycle_env }}"
@@ -21,7 +21,7 @@
   - name: Updating activation key release versions
     command: >
       /bin/hammer activation-key update
-      --organization "{{ initial_org }}"
+      --organization "{{ organization }}"
       --name "{{ item.name }}"
       --release-version "{{ item.releasever }}"
     register: update_activation_keys_rv
@@ -37,7 +37,7 @@
   - name: Obtaining All Subscription IDs
     shell: >
       /bin/hammer subscription list
-      --organization "{{ initial_org }}" | awk -F"|" '{ print $8 }' | column -t | egrep -vi "(--|ID)"
+      --organization "{{ organization }}" | awk -F"|" '{ print $8 }' | column -t | egrep -vi "(--|ID)"
     register: all_subscription_ids
     changed_when: no
 
@@ -45,7 +45,7 @@
   - name: Add subscription to activation key(s)
     command: >
       /bin/hammer activation-key add-subscription
-      --organization "{{ initial_org }}"
+      --organization "{{ organization }}"
       --name "{{ item[0].name }}"
       --subscription-id "{{ item[1] }}"
     register: add_activation_key_sub
@@ -62,7 +62,7 @@
   - name: Override content defaults to enable needed repos for activation key(s)
     command: >
       /bin/hammer activation-key content-override
-      --organization "{{ initial_org }}"
+      --organization "{{ organization }}"
       --name "{{ item.0.name }}"
       --content-label "{{ item.1 }}"
       --value 1

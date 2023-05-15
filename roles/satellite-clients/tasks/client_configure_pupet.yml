@@ -1,0 +1,39 @@
+---
+# tasks file for satellite-clients
+
+- name: Update puppet conf ca
+  lineinfile: dest=/etc/puppet/puppet.conf
+    regexp="^\s*ca_server\s*="
+    line="ca_server = {{ groups['puppet_ca'][0] }}"
+  tags: puppet
+
+- name: Update puppet conf server
+  lineinfile: dest=/etc/puppet/puppet.conf
+    regexp="^\s*server\s*="
+    line="server = {{ groups['puppet_master'][0] }}"
+  tags: puppet
+
+- name: Update puppet environment
+  lineinfile: dest=/etc/puppet/puppet.conf
+    regexp="^\s*environment\s*="
+    line="environment = {{ puppet_env }}"
+  tags: puppet
+
+- name: Kill existing puppet agent runs
+  command: /usr/bin/killall puppet
+  tags: puppet
+  ignore_errors: True
+
+- name: Run puppet to cache certs
+  shell: /usr/bin/puppet agent -t
+  ignore_errors: True
+  tags: puppet
+
+- name: sign puppet certificate
+  shell: /usr/bin/puppet cert sign {{ ansible_fqdn }}
+  delegate_to: "{{ groups['puppet_ca'][0] }}"
+  tags: puppet
+
+- name: Run puppet again with valid cert
+  shell: /usr/bin/puppet agent -t
+  ignore_errors: True

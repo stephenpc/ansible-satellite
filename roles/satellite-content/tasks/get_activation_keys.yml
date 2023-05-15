@@ -1,0 +1,34 @@
+---
+# Create activation keys
+
+  # Get all activation Keys
+- name: Get list of all activation keys
+  shell:
+    cmd: 'hammer activation-key list --organization "{{ organization }}" --fields name'
+  register: activation_keys
+
+- set_fact:
+    activation_keys_list: "{{  activation_keys.stdout.split('\n') | | regex_replace('[ \f\t\v]+$', '') }}"
+
+- set_fact:
+    separators: "{{ activation_keys_list[0] }}"
+    title: "{{ activation_keys_list[1] }}"
+    number_of_keys: "{{ activation_keys_list|length }}"
+
+- set_fact:
+    activation_keys_list_remove_lines: "{{ activation_keys_list|reject('search', separators)|list }}"
+
+- set_fact:
+    activation_keys_list_remove_title: "{{ activation_keys_list_remove_lines|reject('search', title)|list }}"
+
+- set_fact:
+    activation_keys_list: 
+      - list: "{{ activation_keys_list_remove_title }}"
+        org: "{{ organization }}"
+
+
+
+    
+
+
+    

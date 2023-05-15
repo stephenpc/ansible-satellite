@@ -5,7 +5,7 @@
   - name: Creating sync plan(s)
     command: >
       /bin/hammer sync-plan create
-      --organization "{{ initial_org }}"
+      --organization "{{ organization }}"
       --name "{{ item.name }}"
       --sync-date "{{ ansible_date_time.date }} {{ item.synctime }}"
       --interval "{{ item.interval }}"
@@ -23,7 +23,7 @@
   - name: Assign products to sync plan(s)
     command: >
       /bin/hammer product set-sync-plan
-      --organization "{{ initial_org }}"
+      --organization "{{ organization }}"
       --sync-plan "{{ item.0.name }}"
       --name "{{ item.1 }}"
     register: syncproduct_assign

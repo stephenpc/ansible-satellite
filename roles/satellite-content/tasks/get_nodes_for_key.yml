@@ -1,0 +1,33 @@
+---
+# Create activation keys
+
+  # Get all activation Keys
+- name: Get node for specific key
+  shell:
+    cmd: 'hammer host list --search activation_key="{{ activation_key }}" --fields name'
+  register: host_for_key 
+
+- set_fact:
+    host_for_key_list: "{{  host_for_key.stdout.split('\n') | | regex_replace('[ \f\t\v]+$', '') }}"
+
+- set_fact:
+    separators: "{{ host_for_key_list[0] }}"
+    title: "{{ host_for_key_list[1] }}"
+    number_of_servers_keys: "{{ host_for_key_list|length }}"
+
+- set_fact:
+    host_for_key_list_lines: "{{ host_for_key_list|reject('search', separators)|list }}"
+
+- set_fact:
+    host_for_key_list_title: "{{ host_for_key_list_lines|reject('search', title)|list }}"
+
+- set_fact:
+    host_for_key_list: 
+      - list: "{{ host_for_key_list_title }}"
+        org: "{{ organization }}"
+        ak: "{{ activation_key }}"
+
+
+
+
+    

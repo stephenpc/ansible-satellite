@@ -4,9 +4,10 @@
 - hosts: satellite6-server-prod
   become: yes
   vars_files:
-    - group_vars/all.yml
+    - group_vars/satellite.yml
     - group_vars/secrets.yml
   gather_facts: yes
+
   roles:
     # satellite-install | Install Satellite 6 to a host
     - role: satellite-install

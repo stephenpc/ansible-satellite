@@ -5,7 +5,7 @@
   - name: Create additional products
     command: >
       /bin/hammer product create
-      --organization "{{ initial_org }}"
+      --organization "{{ organization }}"
       --name "{{ item.name }}"
     register: create_addl_prod
     with_items: sat_custom_products
@@ -19,7 +19,7 @@
   - name: Create additional yum repositories
     command: >
       /bin/hammer repository create
-      --organization "{{ initial_org }}"
+      --organization "{{ organization }}"
       --product "{{ item.0.name }}"
       --name "{{ item.1.name }}"
       --content-type "yum"

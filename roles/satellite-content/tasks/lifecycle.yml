@@ -5,7 +5,7 @@
   - name: Creating lifecycle environments
     command: >
       /bin/hammer lifecycle-environment create
-      --organization "{{ initial_org }}"
+      --organization "{{ organization }}"
       --name "{{ item.env }}"
       --description "{{ item.env }} Environment"
       --prior "{{ item.prior }}"

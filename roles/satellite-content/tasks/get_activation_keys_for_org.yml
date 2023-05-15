@@ -1,0 +1,25 @@
+---
+# Create activation keys
+
+  # Get all activation Keys
+
+- name: ":::: Get Activation Keys for Organization ::::"
+  include_tasks: ./get_activation_keys.yml
+
+- debug:
+    msg: "{{ activation_keys_list }}"
+
+- name: ":::: Create content inventory ::::"
+  include_tasks: ./create_content_inventory.yml
+  with_items: "{{ activation_keys_list[0].list }}"
+  vars:
+    node:
+      organization: "{{ activation_keys_list[0].org }}"
+      activationkey: "{{ item }}"
+  when: activation_keys_list[0].list is defined and ( activation_keys_list[0].list|length>0 )
+
+    
+
+
+  
+    

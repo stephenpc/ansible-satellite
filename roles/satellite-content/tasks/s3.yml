@@ -17,7 +17,7 @@
 - name: Upload changed packages to their respective repositories in the custom product
   command: >
     /bin/hammer repository upload-content
-    --organization "{{ initial_org }}"
+    --organization "{{ organization }}"
     --product "{{ sat_custom_product }}"
     --name "{{ item.item[0].name }}"
     --path "{{ item.dest }}"

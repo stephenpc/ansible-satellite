@@ -4,7 +4,7 @@
 - name: Enable repositories
   command: >
     /bin/hammer repository-set enable
-    --organization "{{ initial_org }}"
+    --organization "{{ organization }}"
     --product "{{ item.0.name }}"
     --name "{{ item.1.name }}"
     {{ item.1.options }}
@@ -24,7 +24,7 @@
 - name: Synchronize Red Hat yum repositories in the background
   command: >
     /bin/hammer product synchronize
-    --organization "{{ initial_org }}"
+    --organization "{{ organization }}"
     --name "{{ item.name }}"
     --async
   with_items: sat_products
@@ -34,7 +34,7 @@
 - name: Assign products to sync plan(s)
   command: >
     /bin/hammer product set-sync-plan
-    --organization "{{ initial_org }}"
+    --organization "{{ organization }}"
     --sync-plan "{{ item.0.name }}"
     --name "{{ item.1 }}"
   register: syncproduct_assign
@@ -63,7 +63,7 @@
 - name: Determine Satellite Repo ID
   shell: >
     /bin/hammer repository list
-    --organization "{{ initial_org }}"
+    --organization "{{ organization }}"
     --search "*Red\ Hat\ Satellite\ 6.1\ for\ RHEL\ 7\ Server*" | egrep -v "(\-\-\-|PRODUCT)" | awk '{ print $1 }'
   register: satellite_repository_id
   ignore_errors: yes
@@ -83,7 +83,7 @@
 - name: Creating lifecycle environments
   command: >
     /bin/hammer lifecycle-environment create
-    --organization "{{ initial_org }}"
+    --organization "{{ organization }}"
     --name "{{ item.env }}"
     --description "{{ item.env }} Environment"
     --prior "{{ item.prior }}"
@@ -99,7 +99,7 @@
 - name: Creating content view(s)
   command: >
     /bin/hammer content-view create
-    --organization "{{ initial_org }}"
+    --organization "{{ organization }}"
     --name "{{ item.name }}"
     --description "{{ item.description }}"
   register: create_content_view
@@ -114,7 +114,7 @@
 - name: Updating defined content view(s)
   command: >
     /bin/hammer content-view update
-    --organization "{{ initial_org }}"
+    --organization "{{ organization }}"
     --name "{{ item.item.name }}"
     --description "{{ item.item.description }}"
   register: update_content_view
@@ -130,7 +130,7 @@
 - name: Assign repositories to content views via repository ids
   command: >
     /bin/hammer content-view update
-    --organization "{{ initial_org }}"
+    --organization "{{ organization }}"
     --name "{{ item.name }}"
     --repository-ids "{{ sat_combined_repo_ids |list| join(',') }}"
   register: update_content_view
@@ -145,7 +145,7 @@
 - name: Creating content view date filter(s)
   command: >
     /bin/hammer content-view filter create
-    --organization "{{ initial_org }}"
+    --organization "{{ organization }}"
     --name "{{ item.name }}"
     --content-view "{{ item.applytocv }}"
     --inclusion "{{ item.inclusion | default(no) }}"
@@ -164,7 +164,7 @@
 - name: Add content filter rules by start date
   command: >
     /bin/hammer content-view filter rule create
-    --organization "{{ initial_org }}"
+    --organization "{{ organization }}"
     --content-view "{{ item.applytocv }}"
     --content-view-filter "{{ item.name }}"
     --start-date "{{ item.start_date }}"
@@ -184,7 +184,7 @@
 - name: Applying repository restrictions to date filters
   command: >
     /bin/hammer content-view filter update
-    --organization "{{ initial_org }}"
+    --organization "{{ organization }}"
     --name "{{ item.name }}"
     --content-view "{{ item.applytocv }}"
     --repository-ids "{{ item.repo_ids | join(',') }}"
@@ -202,7 +202,7 @@
 - name: Publish content views to the Library environment
   command: >
     /bin/hammer content-view publish
-    --organization "{{ initial_org }}"
+    --organization "{{ organization }}"
     --name "{{ item.name }}"
   register: publish_content_view
   with_items: sat_content_views
@@ -217,7 +217,7 @@
 - name: Promote initial content views from the Library to their respective environments
   command: >
     /bin/hammer content-view version promote
-    --organization "{{ initial_org }}"
+    --organization "{{ organization }}"
     --content-view "{{ item.0.name }}"
     --to-lifecycle-environment "{{ item.1 }}"
     --version "1.0"
@@ -238,7 +238,7 @@
 - name: Creating activation key(s)
   command: >
     /bin/hammer activation-key create
-    --organization "{{ initial_org }}"
+    --organization "{{ organization }}"
     --name "{{ item.name }}"
     --content-view "{{ item.content_view }}"
     --lifecycle-environment "{{ item.lifecycle_env }}"
@@ -254,7 +254,7 @@
 - name: Updating activation key release versions
   command: >
     /bin/hammer activation-key update
-    --organization "{{ initial_org }}"
+    --organization "{{ organization }}"
     --name "{{ item.name }}"
     --release-version "{{ item.releasever }}"
   register: update_activation_keys_rv
@@ -270,7 +270,7 @@
 - name: Obtaining All Subscription IDs
   shell: >
     /bin/hammer subscription list
-    --organization "{{ initial_org }}" | awk -F"|" '{ print $8 }' | column -t | egrep -vi "(--|ID)"
+    --organization "{{ organization }}" | awk -F"|" '{ print $8 }' | column -t | egrep -vi "(--|ID)"
   register: all_subscription_ids
   changed_when: no
 
@@ -278,7 +278,7 @@
 - name: Add subscription to activation key(s)
   command: >
     /bin/hammer activation-key add-subscription
-    --organization "{{ initial_org }}"
+    --organization "{{ organization }}"
     --name "{{ item[0].name }}"
     --subscription-id "{{ item[1] }}"
   register: add_activation_key_sub
@@ -295,7 +295,7 @@
 - name: Override content defaults to enable needed repos for activation key(s)
   command: >
     /bin/hammer activation-key content-override
-    --organization "{{ initial_org }}"
+    --organization "{{ organization }}"
     --name "{{ item.0.name }}"
     --content-label "{{ item.1 }}"
     --value 1

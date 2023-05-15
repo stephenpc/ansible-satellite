@@ -4,15 +4,19 @@ galaxy_info:
   description: Authentication role for Red Hat Satellite 6, that sets up local and external authentication sources
   # company: your company (optional)
   license: GPLv3
-  min_ansible_version: 1.9.4
+  min_ansible_version: 2.9.x
   platforms:
     - name: EL
       versions:
         - 6
         - 7
+        - 8
+        - 9
   categories:
     - cloud
     - cloud:ec2
     - packaging
     - system
+    - physical
+    - vmware
 dependencies: []
